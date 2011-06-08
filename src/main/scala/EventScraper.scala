@@ -6,12 +6,12 @@ case class Meet(baseUrl: String, teamId: String) {
   }
 }
 case class Event(id: String, name: String)
-case class Person(firstName: String, lastName: String, team: String) {
+case class Person(firstName: String, lastName: String) {
   def fullName: String = {
     firstName + " " + lastName;
   }
 }
-case class Result(entrant: Person, age: Int, place: String, seedTime: String, finalTime: String)
+case class Result(entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String)
 
 class Scraper(meet: Meet) {
   val EventLink = """^<a href="(.+).htm" target=main>([^<]*)</a>.*""".r;
@@ -29,13 +29,14 @@ class Scraper(meet: Meet) {
     lEvents.reverse
   }
 
+  //TODO: Return Iterator[Result]
   def eventResults(eventId:String): List[Result] = {
     val eventUrl = meet.eventUrl + "/" + eventId + ".htm";
     val page = Source.fromURL(eventUrl)
     // Parse results
     var lResults = List[Result]();
     for (line <- page.getLines(); m <- EntrantPattern findAllIn line) m match {
-      case EntrantPattern(place, lastName, firstName, age, team, seed, finals) => lResults = new Result(new Person(firstName, lastName, team.trim), age.toInt, place, seed, finals) :: lResults;
+      case EntrantPattern(place, lastName, firstName, age, team, seed, finals) => lResults = new Result(new Person(firstName, lastName), age.toInt, team.trim, place, seed, finals) :: lResults;
     }
     lResults.reverse
   }
