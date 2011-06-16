@@ -1,16 +1,36 @@
 import scala.io.Source;
 
 case class Meet(baseUrl: String, teamId: String) {
-  def eventUrl: String = {
+  def url: String = {
     baseUrl + "/" + teamId;
   }
+
+  def eventsPage = {
+    val eventsUrl = url + "/evtindex.htm"
+    Source.fromURL(eventsUrl)
+  }
+
+  var meetName: String = null;
+
+  def name: String = {
+    if (meetName == null) {
+      val MeetNamePattern = """<h2.*>(.*)</h2>""".r
+      for (line <- eventsPage.getLines; m <- MeetNamePattern findFirstIn line) m match {
+        case MeetNamePattern(name) => meetName = name.trim();
+      }
+    }
+    meetName
+  }
 }
+
 case class Event(id: String, name: String)
+
 case class Person(firstName: String, lastName: String) {
   def fullName: String = {
     firstName + " " + lastName;
   }
 }
+
 case class Result(entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String)
 
 class Scraper(meet: Meet) {
@@ -18,11 +38,9 @@ class Scraper(meet: Meet) {
   val EntrantPattern = """\s*(\d+|-+)\s*(\w+), (\w+)\s*(\d+)\s*([\D]*)\s*([0-9:.NST]+)\s+([0-9:.NST]+)\s*.*""".r
 
   def events: List[Event] = {
-    val meetUrl = meet.eventUrl + "/evtindex.htm";
-    val eventPage = Source.fromURL(meetUrl);
 
     var lEvents = List[Event]()
-    for (line <- eventPage.getLines; m <- EventLink findAllIn line) m match {
+    for (line <- meet.eventsPage.getLines; m <- EventLink findAllIn line) m match {
       case EventLink(id, name) => lEvents = new Event(id, name.trim) :: lEvents
     }
 
@@ -30,8 +48,8 @@ class Scraper(meet: Meet) {
   }
 
   //TODO: Return Iterator[Result]
-  def eventResults(eventId:String): List[Result] = {
-    val eventUrl = meet.eventUrl + "/" + eventId + ".htm";
+  def eventResults(eventId: String): List[Result] = {
+    val eventUrl = meet.url + "/" + eventId + ".htm";
     val page = Source.fromURL(eventUrl)
     // Parse results
     var lResults = List[Result]();
