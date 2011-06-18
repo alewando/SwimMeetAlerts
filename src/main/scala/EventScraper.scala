@@ -52,17 +52,17 @@ class Scraper(meet: Meet) {
   //TODO: Return Iterator[Result]
   def eventResults(eventId: String): List[Result] = {
     val eventUrl = meet.url + "/" + eventId + ".htm";
+    var lResults = List[Result]();
     try {
       val page = Source.fromURL(eventUrl)
       // Parse results
-      var lResults = List[Result]();
       for (line <- page.getLines(); m <- EntrantPattern findAllIn line) m match {
         case EntrantPattern(place, lastName, firstName, age, team, seed, finals) => lResults = new Result(new Person(firstName, lastName), age.toInt, team.trim, place, seed, finals) :: lResults;
       }
-      lResults.reverse
     } catch {
       case e: Exception => log.error("Error scraping event " + eventId + ": " + e)
-      List()
     }
+    log.debug("Done scraping event "+eventId)
+    lResults.reverse
   }
 }
