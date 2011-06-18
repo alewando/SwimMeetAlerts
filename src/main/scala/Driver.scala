@@ -1,5 +1,3 @@
-import com.novus.salat._
-import com.novus.salat.global._
 import com.mongodb._
 import casbah.commons.conversions.scala._
 import com.mongodb.casbah.Imports._
@@ -14,8 +12,8 @@ object Driver {
     val db = mongo("meetResults")
     val coll = db("personResults")
 
-    val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc")
-    //val meet = new Meet("http://results.teamunify.com", "nkc")
+    //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc")
+    val meet = new Meet("http://results.teamunify.com", "nkc")
     println(meet.name + ":" + meet.url)
     val scraper = new Scraper(meet)
     val x = scraper.events
