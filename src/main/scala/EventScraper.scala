@@ -1,4 +1,6 @@
-import scala.io.Source;
+import com.sun.tools.javac.util.Log
+import org.slf4j.LoggerFactory
+import scala.io.Source
 
 case class Meet(baseUrl: String, teamId: String) {
   def url: String = {
@@ -34,6 +36,7 @@ case class Person(firstName: String, lastName: String) {
 case class Result(entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String)
 
 class Scraper(meet: Meet) {
+  val log = LoggerFactory.getLogger(this.getClass())
   val EventLink = """^<a href="(.+).htm" target=main>([^<]*)</a>.*""".r;
   val EntrantPattern = """\s*(\d+|-+)\s*(\w+), (\w+)\s*(\d+)\s*([\D]*)\s*([0-9:.NST]+)\s+([0-9:.NST]+)\s*.*""".r
 
@@ -50,12 +53,17 @@ class Scraper(meet: Meet) {
   //TODO: Return Iterator[Result]
   def eventResults(eventId: String): List[Result] = {
     val eventUrl = meet.url + "/" + eventId + ".htm";
-    val page = Source.fromURL(eventUrl)
-    // Parse results
-    var lResults = List[Result]();
-    for (line <- page.getLines(); m <- EntrantPattern findAllIn line) m match {
-      case EntrantPattern(place, lastName, firstName, age, team, seed, finals) => lResults = new Result(new Person(firstName, lastName), age.toInt, team.trim, place, seed, finals) :: lResults;
+    try {
+      val page = Source.fromURL(eventUrl)
+      // Parse results
+      var lResults = List[Result]();
+      for (line <- page.getLines(); m <- EntrantPattern findAllIn line) m match {
+        case EntrantPattern(place, lastName, firstName, age, team, seed, finals) => lResults = new Result(new Person(firstName, lastName), age.toInt, team.trim, place, seed, finals) :: lResults;
+      }
+      lResults.reverse
+    } catch {
+      case e: Exception => log.error("Error scraping event " + eventId + ": " + e)
+      List()
     }
-    lResults.reverse
   }
 }

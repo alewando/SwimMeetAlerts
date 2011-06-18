@@ -12,41 +12,41 @@ object Driver {
 
   def main(args: Array[String]) {
     try {
-    val mongo = MongoConnection();
-    val db = mongo("meetResults")
-    val coll = db("personResults")
+      val mongo = MongoConnection();
+      val db = mongo("meetResults")
+      val coll = db("personResults")
 
-    //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
-    val meet = new Meet("http://results.teamunify.com", "nkc")
-    log.info(meet.name + ":" + meet.url)
-    val scraper = new Scraper(meet)
-    val x = scraper.events
-    // TODO: Better filtering (ie: not hard-coded name)
-    for (event <- x; result <- scraper.eventResults(event.id); if result.entrant.fullName.contains("Carman")) {
-      log.debug(event.toString);
-      log.debug(result.toString);
-      val dboPersonalResults = coll.findOne(MongoDBObject("firstName" -> result.entrant.firstName, "lastName" -> result.entrant.lastName,
-        "meet" -> meet.name, "event" -> event.name))
-      if (dboPersonalResults.isDefined) {
-        log.debug("Not replacing existing event record for event " + event.name)
-      } else {
-        val builder = MongoDBObject.newBuilder
-        builder += "firstName" -> result.entrant.firstName
-        builder += "lastName" -> result.entrant.lastName
-        builder += "meet" -> meet.name
-        builder += "event" -> event.name
-        builder += "age" -> result.age
-        builder += "team" -> result.team
-        builder += "seedTime" -> result.seedTime
-        builder += "finalTime" -> result.finalTime
-        val record = builder.result()
-        sendEmail(record)
-        log.info("Adding new event record: "+record)
-        coll += record
+      //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
+      val meet = new Meet("http://results.teamunify.com", "nkc")
+      log.info(meet.name + ":" + meet.url)
+      val scraper = new Scraper(meet)
+      val x = scraper.events
+      // TODO: Better filtering (ie: not hard-coded name)
+      for (event <- x; result <- scraper.eventResults(event.id); if result.entrant.fullName.contains("Carman")) {
+        log.debug(event.toString);
+        log.debug(result.toString);
+        val dboPersonalResults = coll.findOne(MongoDBObject("firstName" -> result.entrant.firstName, "lastName" -> result.entrant.lastName,
+          "meet" -> meet.name, "event" -> event.name))
+        if (dboPersonalResults.isDefined) {
+          log.debug("Not replacing existing event record for event " + event.name)
+        } else {
+          val builder = MongoDBObject.newBuilder
+          builder += "firstName" -> result.entrant.firstName
+          builder += "lastName" -> result.entrant.lastName
+          builder += "meet" -> meet.name
+          builder += "event" -> event.name
+          builder += "age" -> result.age
+          builder += "team" -> result.team
+          builder += "seedTime" -> result.seedTime
+          builder += "finalTime" -> result.finalTime
+          val record = builder.result()
+          sendEmail(record)
+          log.info("Adding new event record: " + record)
+          coll += record
+        }
       }
-    }
     } catch {
-      case e: Exception => log.error("Error",e);
+      case e: Exception => log.error("Error", e);
     }
   }
 
