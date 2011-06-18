@@ -11,6 +11,7 @@ object Driver {
   RegisterJodaTimeConversionHelpers()
 
   def main(args: Array[String]) {
+    try {
     val mongo = MongoConnection();
     val db = mongo("meetResults")
     val coll = db("personResults")
@@ -44,13 +45,15 @@ object Driver {
         coll += record
       }
     }
-
+    } catch {
+      case e: Exception => log.error("Error",e);
+    }
   }
 
   def sendEmail(record: MongoDBObject) {
     // Set up the mail object
     val properties = System.getProperties
-    properties.put("mail.smtp.host", "kobe.alewando.com")
+    properties.put("mail.smtp.host", "192.168.0.1")
     val session = Session.getDefaultInstance(properties)
     val message = new MimeMessage(session)
 
