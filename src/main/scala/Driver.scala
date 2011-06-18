@@ -20,9 +20,9 @@ object Driver {
       val meet = new Meet("http://results.teamunify.com", "nkc")
       log.info(meet.name + ":" + meet.url)
       val scraper = new Scraper(meet)
-      val x = scraper.events
+      val events = scraper.events
       // TODO: Better filtering (ie: not hard-coded name)
-      for (event <- x; result <- scraper.eventResults(event.id); if result.entrant.fullName.contains("Carman")) {
+      for (event <- events; result <- scraper.eventResults(event.id); if result.entrant.fullName.contains("Carman")) {
         log.debug(event.toString);
         log.debug(result.toString);
         val dboPersonalResults = coll.findOne(MongoDBObject("firstName" -> result.entrant.firstName, "lastName" -> result.entrant.lastName,
@@ -45,6 +45,7 @@ object Driver {
           coll += record
         }
       }
+      log.info("Done scraping meet: "+meet.name)
     } catch {
       case e: Exception => log.error("Error", e);
     }

@@ -4,3 +4,4 @@ src_managed/
 project/boot/
 SwimMeetAlerts.log
 .history
+.DS_Store
