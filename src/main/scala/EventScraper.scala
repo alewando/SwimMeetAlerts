@@ -1,4 +1,3 @@
-import com.sun.tools.javac.util.Log
 import org.slf4j.LoggerFactory
 import scala.io.Source
 
