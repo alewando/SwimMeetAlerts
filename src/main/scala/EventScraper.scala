@@ -1,3 +1,5 @@
+import actors.Actor
+import scala.actors.Actor._
 import org.slf4j.LoggerFactory
 import scala.io.Source
 
@@ -32,9 +34,9 @@ case class Person(firstName: String, lastName: String) {
   }
 }
 
-case class Result(entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String)
+case class Result(meet: Meet, event: Event, entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String)
 
-class Scraper(meet: Meet) {
+class Scraper(meet: Meet) extends Actor {
   val log = LoggerFactory.getLogger(this.getClass())
   val EventLink = """^<a href="(.+).htm" target=main>([^<]*)</a>.*""".r;
   val EntrantPattern = """\s*(\d+|-+)\s*(\w+), (\w+)\s*(\d+)\s*([\D]*)\s*([0-9:.NST]+)\s+([0-9:.NST]+)\s*.*""".r
@@ -49,20 +51,36 @@ class Scraper(meet: Meet) {
     lEvents.reverse
   }
 
-  //TODO: Return Iterator[Result]
-  def eventResults(eventId: String): List[Result] = {
-    val eventUrl = meet.url + "/" + eventId + ".htm";
-    var lResults = List[Result]();
+  def act() {
+    log.debug("Scraper.act")
+    loop {
+      react {
+        case event: Event => actor {
+          log.debug("Scraper.react.event")
+          scrapeEvent(event)
+        }
+        case Stop => {
+          ResultProcessor ! Stop
+          exit()
+        }
+      }
+    }
+  }
+
+  def scrapeEvent(event: Event) {
+    log.debug("Scraping event " + event.id)
+    val eventUrl = meet.url + "/" + event.id + ".htm";
     try {
       val page = Source.fromURL(eventUrl)
       // Parse results
       for (line <- page.getLines(); m <- EntrantPattern findAllIn line) m match {
-        case EntrantPattern(place, lastName, firstName, age, team, seed, finals) => lResults = new Result(new Person(firstName, lastName), age.toInt, team.trim, place, seed, finals) :: lResults;
+        case EntrantPattern(place, lastName, firstName, age, team, seed, finals) =>
+          // Publish meesage to result processor
+          ResultProcessor ! new Result(meet, event, new Person(firstName, lastName), age.toInt, team.trim, place, seed, finals)
       }
     } catch {
-      case e: Exception => log.error("Error scraping event " + eventId + ": " + e)
+      case e: Exception => log.error("Error scraping event " + event.id + ": " + e)
     }
-    log.debug("Done scraping event "+eventId)
-    lResults.reverse
+    log.debug("Done scraping event " + event.id)
   }
 }

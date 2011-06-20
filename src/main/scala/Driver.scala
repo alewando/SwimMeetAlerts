@@ -1,14 +1,17 @@
-import com.mongodb._
-import casbah.commons.conversions.scala._
-import com.mongodb.casbah.Imports._
 import javax.mail.internet.{InternetAddress, MimeMessage}
-import javax.mail.{Transport, Message, Session}
+import javax.mail.{Address, Transport, Message, Session}
+import scala.actors.Actor._
+import scala.actors.Actor
+import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
+import com.mongodb.casbah.Imports._
 import org.slf4j.LoggerFactory
 
 object Driver {
   val log = LoggerFactory.getLogger(this.getClass)
 
   RegisterJodaTimeConversionHelpers()
+  ResultProcessor.start()
+  EmailSender.start()
 
   def main(args: Array[String]) {
     try {
@@ -20,58 +23,112 @@ object Driver {
       val meet = new Meet("http://results.teamunify.com", "nkc")
       log.info(meet.name + ":" + meet.url)
       val scraper = new Scraper(meet)
+      scraper.start()
+
+      // Scrape events from meet page
       val events = scraper.events
-      // TODO: Better filtering (ie: not hard-coded name)
-      for (event <- events; result <- scraper.eventResults(event.id); if result.entrant.fullName.contains("Carman")) {
-        log.debug(event.toString);
-        log.debug(result.toString);
-        val dboPersonalResults = coll.findOne(MongoDBObject("firstName" -> result.entrant.firstName, "lastName" -> result.entrant.lastName,
-          "meet" -> meet.name, "event" -> event.name))
-        if (dboPersonalResults.isDefined) {
-          log.debug("Not replacing existing event record for event " + event.name)
-        } else {
-          val builder = MongoDBObject.newBuilder
-          builder += "firstName" -> result.entrant.firstName
-          builder += "lastName" -> result.entrant.lastName
-          builder += "meet" -> meet.name
-          builder += "event" -> event.name
-          builder += "age" -> result.age
-          builder += "team" -> result.team
-          builder += "seedTime" -> result.seedTime
-          builder += "finalTime" -> result.finalTime
-          val record = builder.result()
-          sendEmail(record)
-          log.info("Adding new event record: " + record)
-          coll += record
-        }
+      for (event <- events) {
+        // Send each event as a message to the scraper
+        log.debug("Sending message for event: " + event.id)
+        scraper ! event
       }
-      log.info("Done scraping meet: "+meet.name)
+      log.info("Done scraping meet: " + meet.name)
+      scraper ! Stop
     } catch {
       case e: Exception => log.error("Error", e);
     }
   }
+}
 
-  def sendEmail(record: MongoDBObject) {
-    // Set up the mail object
+case object Stop
+
+object ResultProcessor extends Actor {
+  val log = LoggerFactory.getLogger(this.getClass)
+
+  def act() {
+    loop {
+      react {
+        case result: Result => actor {
+          handleResult(result)
+        }
+        case Stop => {
+          EmailSender ! Stop
+          exit()
+        }
+      }
+    }
+  }
+
+  def handleResult(result: Result) {
+    log.debug(result.toString);
+    if (!result.entrant.fullName.contains("Carman")) {
+      return
+    }
+    val coll = MongoConnection()("meetResults")("personResults")
+
+    val dboPersonalResults = coll.findOne(MongoDBObject("firstName" -> result.entrant.firstName, "lastName" -> result.entrant.lastName,
+      "meet" -> result.meet.name, "event" -> result.event.name))
+    if (dboPersonalResults.isDefined) {
+      log.debug("Not replacing existing event record for event " + result.event.name)
+    } else {
+      val builder = MongoDBObject.newBuilder
+      builder += "firstName" -> result.entrant.firstName
+      builder += "lastName" -> result.entrant.lastName
+      builder += "meet" -> result.meet.name
+      builder += "event" -> result.event.name
+      builder += "age" -> result.age
+      builder += "team" -> result.team
+      builder += "seedTime" -> result.seedTime
+      builder += "finalTime" -> result.finalTime
+      val record = builder.result()
+      EmailSender ! (result, getEmailRecipientsForEntrant(result))
+      log.info("Adding new event record: " + record)
+      coll += record
+    }
+  }
+
+  def getEmailRecipientsForEntrant(result: Result): List[String] = {
+    // TODO: Look up email recipients
+    return "adam@alewando.com" :: Nil
+  }
+}
+
+object EmailSender extends Actor {
+
+  val session = {
     val properties = System.getProperties
     properties.put("mail.smtp.host", "192.168.0.1")
-    val session = Session.getDefaultInstance(properties)
+    Session.getDefaultInstance(properties)
+  }
+
+  def act() {
+    loop {
+      react {
+        case (result: Result, recipients: List[String]) => sendEmail(result, recipients)
+        case Stop => exit()
+      }
+    }
+  }
+
+  def sendEmail(result: Result, recipientAddresses:List[String]) {
+    // Set up the mail object
     val message = new MimeMessage(session)
 
     // Set the from, to, subject, body text
     message.setFrom(new InternetAddress("SwimMeetAlerts@alewando.com"))
-    message.setRecipients(Message.RecipientType.TO, "adam@alewando.com")
-    message.setSubject("New result for " + record("firstName") + " " + record("lastName") + ": " + record("event"))
-    val body = record("firstName") + " " + record("lastName") + "\n" +
-      record("meet") + "\n" +
-      record("event") + "\n" +
-      "Seed time: " + record("seedTime") + "\n" +
-      "Final time: " + record("finalTime") + "\n";
+
+    val recipients:Array[Address] = recipientAddresses.map(new InternetAddress(_)).toArray
+
+    message.setRecipients(Message.RecipientType.TO, recipients)
+    message.setSubject("New result for " + result.entrant.fullName+ ": " + result.event.name)
+    val body = result.entrant.fullName + "\n" +
+      result.meet.name + "\n" +
+      result.event.name + "\n" +
+      "Seed time: " + result.seedTime + "\n" +
+      "Final time: " + result.finalTime + "\n";
     message.setText(body)
 
     // And send it
     Transport.send(message)
   }
 }
-
-case class PersonResults(person: Person, results: List[Result])
