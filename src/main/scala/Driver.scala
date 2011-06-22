@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 
 object Driver {
   val log = LoggerFactory.getLogger(this.getClass)
+  val MAX_WAIT = 60000
 
   RegisterJodaTimeConversionHelpers()
   ResultProcessor.start()
@@ -37,7 +38,37 @@ object Driver {
     } catch {
       case e: Exception => log.error("Error", e);
     }
+
+    var totalWait = 0;
+    while (totalWait < MAX_WAIT && Coordinator.hasOutstandingTasks) {
+      log.info("Waiting for tasks to complete");
+      Thread.sleep(1000);
+      totalWait += 1000;
+    }
+    log.info("All tasks complete. exiting")
   }
+}
+
+object Coordinator {
+  var outstandingTasks = 0;
+  var taskCount = 0;
+
+  def taskStarted {
+    synchronized {
+      taskCount += 1;
+      outstandingTasks += 1;
+    }
+  }
+
+  def taskFinished {
+    synchronized {
+      outstandingTasks -= 1
+    }
+  }
+
+  def hasOutstandingTasks: Boolean = synchronized {
+    outstandingTasks > 0
+  };
 }
 
 case object Stop
@@ -49,7 +80,12 @@ object ResultProcessor extends Actor {
     loop {
       react {
         case result: Result => actor {
-          handleResult(result)
+          try {
+            Coordinator.taskStarted
+            handleResult(result)
+          } finally {
+            Coordinator.taskFinished
+          }
         }
         case Stop => {
           EmailSender ! Stop
@@ -104,23 +140,28 @@ object EmailSender extends Actor {
   def act() {
     loop {
       react {
-        case (result: Result, recipients: List[String]) => sendEmail(result, recipients)
+        case (result: Result, recipients: List[String]) => try {
+          Coordinator.taskStarted
+          sendEmail(result, recipients)
+        } finally {
+          Coordinator.taskFinished
+        }
         case Stop => exit()
       }
     }
   }
 
-  def sendEmail(result: Result, recipientAddresses:List[String]) {
+  def sendEmail(result: Result, recipientAddresses: List[String]) {
     // Set up the mail object
     val message = new MimeMessage(session)
 
     // Set the from, to, subject, body text
     message.setFrom(new InternetAddress("SwimMeetAlerts@alewando.com"))
 
-    val recipients:Array[Address] = recipientAddresses.map(new InternetAddress(_)).toArray
+    val recipients: Array[Address] = recipientAddresses.map(new InternetAddress(_)).toArray
 
     message.setRecipients(Message.RecipientType.TO, recipients)
-    message.setSubject("New result for " + result.entrant.fullName+ ": " + result.event.name)
+    message.setSubject("New result for " + result.entrant.fullName + ": " + result.event.name)
     val body = result.entrant.fullName + "\n" +
       result.meet.name + "\n" +
       result.event.name + "\n" +

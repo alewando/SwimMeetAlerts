@@ -56,8 +56,13 @@ class Scraper(meet: Meet) extends Actor {
     loop {
       react {
         case event: Event => actor {
-          log.debug("Scraper.react.event")
-          scrapeEvent(event)
+          try {
+            Coordinator.taskStarted
+            log.debug("Scraper.react.event")
+            scrapeEvent(event)
+          } finally {
+            Coordinator.taskFinished
+          }
         }
         case Stop => {
           ResultProcessor ! Stop
