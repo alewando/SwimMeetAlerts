@@ -10,14 +10,15 @@ object Driver {
   val log = LoggerFactory.getLogger(this.getClass)
   val MAX_WAIT = 60000
 
+  val mongo = MongoConnection();
+  val db = mongo("meetResults")
+
   RegisterJodaTimeConversionHelpers()
   ResultProcessor.start()
   EmailSender.start()
 
   def main(args: Array[String]) {
     try {
-      val mongo = MongoConnection();
-      val db = mongo("meetResults")
       val coll = db("personResults")
 
       //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
@@ -75,6 +76,7 @@ case object Stop
 
 object ResultProcessor extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
+  val db = MongoConnection()("meetResults")
 
   def act() {
     loop {
@@ -105,8 +107,7 @@ object ResultProcessor extends Actor {
       case x:List[String] => x
     }
 
-    val coll = MongoConnection()("meetResults")("personResults")
-
+    val coll = db("personResults")
     val dboPersonalResults = coll.findOne(MongoDBObject("firstName" -> result.entrant.firstName, "lastName" -> result.entrant.lastName,
       "meet" -> result.meet.name, "event" -> result.event.name))
     if (dboPersonalResults.isDefined) {
@@ -130,7 +131,7 @@ object ResultProcessor extends Actor {
 
   def getEmailRecipientsForEntrant(result: Result): List[String] = {
     // Look up email recipients
-    val coll = MongoConnection()("meetResults")("personEmail")
+    val coll = db("personEmail")
 
     var res: List[String] = Nil
     coll.findOne(MongoDBObject("name" -> result.entrant.fullName)).foreach { x =>
