@@ -97,9 +97,14 @@ object ResultProcessor extends Actor {
 
   def handleResult(result: Result) {
     log.debug(result.toString);
-    if (!result.entrant.fullName.contains("Carman")) {
-      return
+
+    if(!result.entrant.firstName.equals("Jordan")) return
+
+    val emailRecips = getEmailRecipientsForEntrant(result) match {
+      case Nil => return
+      case x:List[String] => x
     }
+
     val coll = MongoConnection()("meetResults")("personResults")
 
     val dboPersonalResults = coll.findOne(MongoDBObject("firstName" -> result.entrant.firstName, "lastName" -> result.entrant.lastName,
@@ -124,8 +129,15 @@ object ResultProcessor extends Actor {
   }
 
   def getEmailRecipientsForEntrant(result: Result): List[String] = {
-    // TODO: Look up email recipients
-    return "adam@alewando.com" :: Nil
+    // Look up email recipients
+    val coll = MongoConnection()("meetResults")("personEmail")
+
+    var res: List[String] = Nil
+    coll.findOne(MongoDBObject("name" -> result.entrant.fullName)).foreach { x =>
+        res= x.as[BasicDBList]("emailRecipients").toList collect {case s:String => s}
+    }
+
+    res
   }
 }
 
