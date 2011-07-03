@@ -19,23 +19,12 @@ object Driver {
 
   def main(args: Array[String]) {
     try {
-      val coll = db("personResults")
-
       //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
       val meet = new Meet("http://results.teamunify.com", "nkc")
       log.info(meet.name + ":" + meet.url)
-      val scraper = new Scraper(meet)
-      scraper.start()
+      Scraper.start()
+      Scraper.scrapeMeet(meet)
 
-      // Scrape events from meet page
-      val events = scraper.events
-      for (event <- events) {
-        // Send each event as a message to the scraper
-        log.debug("Sending message for event: " + event.id)
-        scraper ! event
-      }
-      log.info("Done scraping meet: " + meet.name)
-      scraper ! Stop
     } catch {
       case e: Exception => log.error("Error", e);
     }
@@ -50,6 +39,9 @@ object Driver {
   }
 }
 
+/**
+ * Tracks outstanding (still executing) tasks
+ */
 object Coordinator {
   var outstandingTasks = 0;
   var taskCount = 0;
@@ -74,6 +66,9 @@ object Coordinator {
 
 case object Stop
 
+/**
+ * Processes a scraped result record. Saves new results to DB and sends an email.
+ */
 object ResultProcessor extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
   val db = MongoConnection()("meetResults")
@@ -109,14 +104,14 @@ object ResultProcessor extends Actor {
 
     val coll = db("personResults")
     val dboPersonalResults = coll.findOne(MongoDBObject("firstName" -> result.entrant.firstName, "lastName" -> result.entrant.lastName,
-      "meet" -> result.meet.name, "event" -> result.event.name))
+      "meet" -> result.event.meet.name, "event" -> result.event.name))
     if (dboPersonalResults.isDefined) {
       log.debug("Not replacing existing event record for event " + result.event.name)
     } else {
       val builder = MongoDBObject.newBuilder
       builder += "firstName" -> result.entrant.firstName
       builder += "lastName" -> result.entrant.lastName
-      builder += "meet" -> result.meet.name
+      builder += "meet" -> result.event.meet.name
       builder += "event" -> result.event.name
       builder += "age" -> result.age
       builder += "team" -> result.team
@@ -176,7 +171,7 @@ object EmailSender extends Actor {
     message.setRecipients(Message.RecipientType.TO, recipients)
     message.setSubject("New result for " + result.entrant.fullName + ": " + result.event.name)
     val body = result.entrant.fullName + "\n" +
-      result.meet.name + "\n" +
+      result.event.meet.name + "\n" +
       result.event.name + "\n" +
       "Seed time: " + result.seedTime + "\n" +
       "Final time: " + result.finalTime + "\n";

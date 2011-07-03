@@ -23,7 +23,7 @@ case class Meet(baseUrl: String, teamId: String) {
   }
 }
 
-case class Event(id: String, name: String)
+case class Event(id: String, meet:Meet, name: String, url:String)
 
 case class Person(firstName: String, lastName: String) {
   def fullName: String = {
@@ -31,4 +31,4 @@ case class Person(firstName: String, lastName: String) {
   }
 }
 
-case class Result(meet: Meet, event: Event, entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String)
+case class Result(event: Event, entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String)
