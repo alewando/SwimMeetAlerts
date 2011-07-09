@@ -7,7 +7,7 @@ import scala.io.Source
 object Scraper extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
   val EventLink = """^<a href="(.+).htm" target=main>([^<]*)</a>.*""".r;
-  val EntrantPattern = """\s*(\d+|-+)\s*(\w+), (\w+)\s*(\d+)\s*([\D]*)\s*([0-9:.NST]+)\s+([0-9:.NST]+)\s*.*""".r
+  val EntrantPattern = """\s*(\d+|-+)\s+(\w+), (\w+)\s+(\d+)\s+([\D]*)\s+([0-9:.NST]+)\s+([0-9:.NST]+)\s*.*""".r
 
   def scrapeMeet(meet: Meet) = {
     // Scrape events from meet page
