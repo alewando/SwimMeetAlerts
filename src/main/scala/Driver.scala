@@ -20,7 +20,7 @@ object Driver {
   def main(args: Array[String]) {
     try {
       //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
-      val meet = new Meet("http://results.teamunify.com", "nkc")
+      val meet = new Meet("http://results.teamunify.com", "oscm")
       log.info(meet.name + ":" + meet.url)
       Scraper.start()
       Scraper.scrapeMeet(meet)
