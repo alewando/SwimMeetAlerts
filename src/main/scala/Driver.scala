@@ -20,7 +20,7 @@ object Driver {
   def main(args: Array[String]) {
     try {
       //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
-      val meet = new Meet("http://results.teamunify.com", "nkc")
+      val meet = new Meet("http://results.teamunify.com", "oscm")
       log.info(meet.name + ":" + meet.url)
       Scraper.start()
       Scraper.scrapeMeet(meet)
@@ -95,11 +95,11 @@ object ResultProcessor extends Actor {
   def handleResult(result: Result) {
     log.debug(result.toString);
 
-    if(!result.entrant.firstName.equals("Jordan")) return
+    if (!result.entrant.firstName.equals("Jordan")) return
 
     val emailRecips = getEmailRecipientsForEntrant(result) match {
       case Nil => return
-      case x:List[String] => x
+      case x: List[String] => x
     }
 
     val coll = db("personResults")
@@ -129,8 +129,11 @@ object ResultProcessor extends Actor {
     val coll = db("personEmail")
 
     var res: List[String] = Nil
-    coll.findOne(MongoDBObject("name" -> result.entrant.fullName)).foreach { x =>
-        res= x.as[BasicDBList]("emailRecipients").toList collect {case s:String => s}
+    coll.findOne(MongoDBObject("name" -> result.entrant.fullName)).foreach {
+      x =>
+        res = x.as[BasicDBList]("emailRecipients").toList collect {
+          case s: String => s
+        }
     }
 
     res
@@ -138,6 +141,8 @@ object ResultProcessor extends Actor {
 }
 
 object EmailSender extends Actor {
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   val session = {
     val properties = System.getProperties
@@ -160,6 +165,7 @@ object EmailSender extends Actor {
   }
 
   def sendEmail(result: Result, recipientAddresses: List[String]) {
+    log.info("Sending email to " + recipientAddresses.length +" recipients")
     // Set up the mail object
     val message = new MimeMessage(session)
 
@@ -173,6 +179,7 @@ object EmailSender extends Actor {
     val body = result.entrant.fullName + "\n" +
       result.event.meet.name + "\n" +
       result.event.name + "\n" +
+      "Place: " + result.place + "\n" +
       "Seed time: " + result.seedTime + "\n" +
       "Final time: " + result.finalTime + "\n";
     message.setText(body)
