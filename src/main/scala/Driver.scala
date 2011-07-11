@@ -5,7 +5,6 @@ import scala.actors.Actor
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import com.mongodb.casbah.Imports._
 import org.slf4j.LoggerFactory
-import sun.security.provider.JavaKeyStore.CaseExactJKS
 
 object Driver {
   val log = LoggerFactory.getLogger(this.getClass)
