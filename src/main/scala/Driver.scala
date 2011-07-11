@@ -5,6 +5,7 @@ import scala.actors.Actor
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import com.mongodb.casbah.Imports._
 import org.slf4j.LoggerFactory
+import sun.security.provider.JavaKeyStore.CaseExactJKS
 
 object Driver {
   val log = LoggerFactory.getLogger(this.getClass)
@@ -95,8 +96,6 @@ object ResultProcessor extends Actor {
   def handleResult(result: Result) {
     log.debug(result.toString);
 
-    if (!result.entrant.firstName.equals("Jordan")) return
-
     val emailRecips = getEmailRecipientsForEntrant(result) match {
       case Nil => return
       case x: List[String] => x
@@ -118,7 +117,7 @@ object ResultProcessor extends Actor {
       builder += "seedTime" -> result.seedTime
       builder += "finalTime" -> result.finalTime
       val record = builder.result()
-      EmailSender ! (result, getEmailRecipientsForEntrant(result))
+      EmailSender ! (result, emailRecips)
       log.info("Adding new event record: " + record)
       coll += record
     }
@@ -153,19 +152,22 @@ object EmailSender extends Actor {
   def act() {
     loop {
       react {
-        case (result: Result, recipients: List[String]) => try {
+        case (result: Result, recipients: List[String]) =>
           Coordinator.taskStarted
-          sendEmail(result, recipients)
-        } finally {
-          Coordinator.taskFinished
-        }
+          try {
+            sendEmail(result, recipients)
+          } catch {
+            case e => log.error("Error sending email", e)
+          } finally {
+            Coordinator.taskFinished
+          }
         case Stop => exit()
       }
     }
   }
 
   def sendEmail(result: Result, recipientAddresses: List[String]) {
-    log.info("Sending email to " + recipientAddresses.length +" recipients")
+    log.info("Sending email to " + recipientAddresses.length + " recipients")
     // Set up the mail object
     val message = new MimeMessage(session)
 
