@@ -1,4 +1,4 @@
-package snippets
+package webapp.snippet
 
 import scala.xml.{ NodeSeq, Text }
 import net.liftweb.util._
@@ -8,8 +8,9 @@ import Helpers._
 
 class HelloWorld {
 
-  // replace the contents of the element with id "time" with the date
-  def howdy = "#stuff *" #> "TESTING"
+  def howdy = { "#stuff *" #> "TESTING" }
+  
+  def render = "#stuff *" #> "test"
 
   /*
    lazy val date: Date = DependencyFactory.time.vend // create the date via factory

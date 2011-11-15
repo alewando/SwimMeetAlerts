@@ -3,12 +3,12 @@ package lift
 import net.liftweb._
 import util._
 import Helpers._
-
 import common._
 import http._
 import sitemap._
 import Loc._
 import mapper._
+import org.slf4j.LoggerFactory
 
 //import code.model._
 
@@ -17,9 +17,22 @@ import mapper._
  * to modify lift's environment
  */
 class LiftBootstrap extends Bootable {
+  val log = LoggerFactory.getLogger(this.getClass())
+
   def boot {
+    log.info("Configuring Lift")
+
     // where to search snippet
-    LiftRules.addToPackages("lift.snippets")
+    LiftRules.addToPackages("webapp")
+
+    // Build SiteMap
+    def sitemap(): SiteMap = SiteMap(Menu.i("Home") / "index")
+    
+    //def sitemapMutators = User.sitemapMutator
+
+    // set the sitemap.  Note if you don't want access control for
+    // each page, just comment this line out.
+    LiftRules.setSiteMapFunc(() => sitemap())
 
     // Use jQuery 1.4
     LiftRules.jsArtifacts = net.liftweb.http.js.jquery.JQuery14Artifacts
