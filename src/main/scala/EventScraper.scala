@@ -7,7 +7,7 @@ import scala.io.Source
 object Scraper extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
   val EventLink = """^<a href="(.+).htm" target=main>([^<]*)</a>.*""".r;
-  val EntrantPattern = """\s*(\d+|-+)\s+(\w+), (\w+)\s+(\d+)\s+([\D]*)\s+(NT|NS|SCR|[0-9:.]+)\s+(NT|NS|SCR|[0-9:.]+)\s*.*""".r
+  val EntrantPattern = """\s*(\d+|-+)\s+(\w+), ([\w\s]+)\s+(\d+)\s+([\D]*)\s+(NT|NS|SCR|[0-9:.]+)\s+(NT|NS|SCR|[0-9:.]+)\s*.*""".r
 
   def scrapeMeet(meet: Meet) = {
     // Scrape events from meet page
@@ -65,8 +65,9 @@ object Scraper extends Actor {
       // Parse results
       for (line <- page.getLines(); m <- EntrantPattern findAllIn line) m match {
         case EntrantPattern(place, lastName, firstName, age, team, seed, finals) =>
+          // TODO: Strip trailing initial from first name if present (ie: "Fred A")
           // Publish meesage to result processor
-          ResultProcessor ! new Result(event, new Person(firstName, lastName), age.toInt, team.trim, place, seed, finals)
+          ResultProcessor ! new Result(event, new Person(firstName.trim, lastName.trim), age.toInt, team.trim, place, seed, finals)
         // TODO: Save event as completed if all entrants have final results
         case _ => if(log.isTraceEnabled()) { log.trace("Line: "+line) }
       }
