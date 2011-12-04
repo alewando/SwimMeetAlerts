@@ -20,7 +20,10 @@ object Driver {
   def main(args: Array[String]) {
     try {
       //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
-      val meet = new Meet("http://results.teamunify.com", "oscm")
+      //val meet = new Meet("http://swimmakos.com", "realtime")
+      //val meet = new Meet("http://results.teamunify.com", "nkc")
+      //val meet = new Meet("http://results.teamunify.com", "ohmmr")
+      val meet = new Meet("http://results.teamunify.com", "isfast")
       log.info(meet.name + ":" + meet.url)
       Scraper.start()
       Scraper.scrapeMeet(meet)
@@ -154,6 +157,7 @@ object EmailSender extends Actor {
         case (result: Result, recipients: List[String]) =>
           Coordinator.taskStarted
           try {
+            // TODO: Iterate over recipients, send separate email (or use BCC?)
             sendEmail(result, recipients)
           } catch {
             case e => log.error("Error sending email", e)
@@ -161,6 +165,7 @@ object EmailSender extends Actor {
             Coordinator.taskFinished
           }
         case Stop => exit()
+        case _  => log.error("Unknown message")
       }
     }
   }
