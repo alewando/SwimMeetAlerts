@@ -2,6 +2,6 @@ target/
 lib_managed/
 src_managed/
 project/boot/
-SwimMeetAlerts.log
+SwimMeetAlerts.log*
 .history
 .DS_Store
