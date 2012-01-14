@@ -125,6 +125,7 @@ object ResultProcessor extends Actor {
   def getEmailRecipientsForEntrant(result: Result): List[String] = {
     // Look up email recipients
     val coll = db("personEmail")
+    //TODO: Log error if collection doesn't exist (give example doc)
 
     var res: List[String] = Nil
     coll.findOne(MongoDBObject("name" -> result.entrant.fullName)).foreach {
