@@ -1,6 +1,23 @@
+import com.typesafe.startscript.StartScriptPlugin
+
+seq(StartScriptPlugin.startScriptForClassesSettings: _*)
+
 name := "SwimMeetAlerts"
 
 scalaVersion := "2.9.1"
+
+seq(webSettings: _*)
+
+libraryDependencies ++= {
+  val liftVersion = "2.4-M4" // Put the current/latest lift version here
+  Seq(
+    "org.eclipse.jetty" % "jetty-server" % "7.3.1.v20110307" % "compile->default",
+    "org.eclipse.jetty" % "jetty-servlet" % "7.3.1.v20110307" % "compile->default",
+    "org.eclipse.jetty" % "jetty-webapp" % "7.3.1.v20110307" % "compile->default",
+    "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default",
+    "net.liftweb" %% "lift-mapper" % liftVersion % "compile->default" withSources()
+  )
+}
 
 libraryDependencies ++= Seq(
     "javax.mail" % "mail" % "1.4.1",
@@ -13,13 +30,11 @@ libraryDependencies ++= Seq(
     "com.h2database" % "h2" % "1.2.147"
 )
 
-{
-  val liftVersion = "2.4-M4"
-  libraryDependencies ++=  Seq(
-    "net.liftweb" %% "lift-webkit" % liftVersion % "compile" withSources(),
-    "net.liftweb" %% "lift-mapper" % liftVersion % "compile" withSources()
-  )
-}
+resolvers += "Java.net Maven2 Repository" at "http://download.java.net/maven/2/"
+
+resolvers += "Scala Tools Snapshots" at "http://scala-tools.org/repo-snapshots"
+
+// resolvers += "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshots"
 
 resolvers += "repo.novus rels" at "http://repo.novus.com/snapshots/"
 
