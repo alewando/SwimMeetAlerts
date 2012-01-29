@@ -10,7 +10,8 @@ object Driver {
   val log = LoggerFactory.getLogger(this.getClass)
   val MAX_WAIT = 60000
 
-  val mongo = MongoConnection();
+  val mongo = MongoConnection("ds029837.mongolab.com", 29837)
+  mongo.authenticate("app","apppw")
   val db = mongo("meetResults")
 
   RegisterJodaTimeConversionHelpers()
