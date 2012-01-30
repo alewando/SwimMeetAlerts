@@ -51,6 +51,15 @@ class LiftBootstrap extends Bootable {
     // Use HTML5 for rendering
     LiftRules.htmlProperties.default.set((r: Req) =>
       new Html5Properties(r.userAgent))
+      
+    //Don't use state with Heroku
+    LiftRules.autoIncludeAjax = _ => false
+    LiftRules.statelessTest.append {
+      case _ => true
+    }
+
+    // Force the request to be UTF-8
+    LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
 
   }
 
