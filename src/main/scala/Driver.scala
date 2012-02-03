@@ -6,12 +6,23 @@ import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHe
 import com.mongodb.casbah.Imports._
 import org.slf4j.LoggerFactory
 
+object DB {  
+  private val strUri = System.getenv().get("MONGOLAB_URI")
+  if(strUri == null) {
+	LoggerFactory.getLogger(this.getClass()).error("No MongoDB URI set in MONGOLAB_URI environment variable")
+  }
+  private val uri = new com.mongodb.MongoURI(strUri)
+  val db = MongoConnection(uri)("meetResults")
+  db.authenticate(uri.getUsername(), new String(uri.getPassword()))  
+  
+  def apply(x : String): MongoCollection = {
+    db(x)
+  }
+}
+
 object Driver {
   val log = LoggerFactory.getLogger(this.getClass)
   val MAX_WAIT = 60000
-
-  val db = MongoConnection("ds029837.mongolab.com", 29837)("meetResults")
-  db.authenticate("app","apppw")
 
   RegisterJodaTimeConversionHelpers()
   ResultProcessor.start()
@@ -74,8 +85,6 @@ case object Stop
  */
 object ResultProcessor extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
-  val db = MongoConnection("ds029837.mongolab.com", 29837)("meetResults")
-  db.authenticate("app","apppw")
 
   def act() {
     loop {
@@ -104,7 +113,7 @@ object ResultProcessor extends Actor {
       case x: List[String] => x
     }
 
-    val coll = db("personResults")
+    val coll = DB("personResults")
     val dboPersonalResults = coll.findOne(MongoDBObject("firstName" -> result.entrant.firstName, "lastName" -> result.entrant.lastName,
       "meet" -> result.event.meet.name, "event" -> result.event.name))
     if (dboPersonalResults.isDefined) {
@@ -128,7 +137,7 @@ object ResultProcessor extends Actor {
 
   def getEmailRecipientsForEntrant(result: Result): List[String] = {
     // Look up email recipients
-    val coll = db("personEmail")
+    val coll = DB("personEmail")
     //TODO: Log error if collection doesn't exist (give example doc)
 
     var res: List[String] = Nil
