@@ -21,13 +21,13 @@ libraryDependencies ++= {
 
 libraryDependencies ++= Seq(
     "javax.mail" % "mail" % "1.4.1",
+    "quartz" % "quartz" % "1.5.2",
     "com.mongodb.casbah" %% "casbah" % "2.1.5-1",
     "org.slf4j" % "slf4j-api" % "1.6.1" withSources(),
     "org.mortbay.jetty" % "jetty" % "6.1.26" % "test",
     "junit" % "junit" % "4.7" % "test",
     "ch.qos.logback" % "logback-classic" % "0.9.26",
-    "org.scala-tools.testing" %% "specs" % "1.6.9" % "test",
-    "com.h2database" % "h2" % "1.2.147"
+    "org.scala-tools.testing" %% "specs" % "1.6.9" % "test"
 )
 
 resolvers += "Java.net Maven2 Repository" at "http://download.java.net/maven/2/"
