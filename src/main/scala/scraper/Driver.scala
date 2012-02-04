@@ -17,7 +17,9 @@ object DB {
   }  
   private val uri = new com.mongodb.MongoURI(strUri)
   val db = MongoConnection(uri)("meetResults")
-  db.authenticate(uri.getUsername(), new String(uri.getPassword()))  
+  if(uri.getUsername()!= null && uri.getPassword() != null) {
+    db.authenticate(uri.getUsername(), new String(uri.getPassword()))  
+  }
   
   def apply(x : String): MongoCollection = {
     db(x)
