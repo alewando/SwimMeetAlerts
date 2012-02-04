@@ -26,7 +26,7 @@ class LiftBootstrap extends Bootable {
     LiftRules.addToPackages("webapp")
 
     // Build SiteMap
-    def sitemap(): SiteMap = SiteMap(Menu.i("Home") / "index")
+    def sitemap(): SiteMap = SiteMap(Menu.i("Home") / "index", Menu.i("Scrape") / "scrape")
     
     //def sitemapMutators = User.sitemapMutator
 
@@ -53,10 +53,10 @@ class LiftBootstrap extends Bootable {
       new Html5Properties(r.userAgent))
       
     //Don't use state with Heroku
-    LiftRules.autoIncludeAjax = _ => false
-    LiftRules.statelessTest.append {
-      case _ => true
-    }
+    //LiftRules.autoIncludeAjax = _ => false
+    //LiftRules.statelessTest.append {
+    //  case _ => true
+    //}
 
     // Force the request to be UTF-8
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))

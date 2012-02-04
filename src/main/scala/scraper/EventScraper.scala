@@ -1,3 +1,5 @@
+package scraper
+
 import actors.Actor
 import scala.actors.Actor._
 import org.slf4j.LoggerFactory

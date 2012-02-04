@@ -1,3 +1,5 @@
+package scraper 
+
 import javax.mail.internet.{InternetAddress, MimeMessage}
 import javax.mail.{Address, Transport, Message, Session}
 import scala.actors.Actor._
@@ -7,10 +9,12 @@ import com.mongodb.casbah.Imports._
 import org.slf4j.LoggerFactory
 
 object DB {  
-  private val strUri = System.getenv().get("MONGOLAB_URI")
+  private val strUri = Option(System.getenv().get("MONGOLAB_URI")) getOrElse "mongodb://heroku_app2660393:c3btjte2421prcbe8qlfi7nn9u@ds029837.mongolab.com:29837/heroku_app2660393"
+  
   if(strUri == null) {
 	LoggerFactory.getLogger(this.getClass()).error("No MongoDB URI set in MONGOLAB_URI environment variable")
-  }
+	
+  }  
   private val uri = new com.mongodb.MongoURI(strUri)
   val db = MongoConnection(uri)("meetResults")
   db.authenticate(uri.getUsername(), new String(uri.getPassword()))  
@@ -27,21 +31,14 @@ object Driver {
   RegisterJodaTimeConversionHelpers()
   ResultProcessor.start()
   EmailSender.start()
+  Scraper.start()
 
   def main(args: Array[String]) {
-    try {
-      //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
-      //val meet = new Meet("http://swimmakos.com", "realtime")
-      //val meet = new Meet("http://results.teamunify.com", "nkc")
-      //val meet = new Meet("http://results.teamunify.com", "ohmmr")
-      val meet = new Meet("http://results.teamunify.com", "isfast")
-      log.info(meet.name + ":" + meet.url)
-      Scraper.start()
-      Scraper.scrapeMeet(meet)
-
-    } catch {
-      case e: Exception => log.error("Error", e);
-    }
+    val meetId = "ohmmr";
+    //val meetId = "isfast";
+    //val meetId = "nkc";
+    
+    scrapeMeet(meetId)
 
     var totalWait = 0;
     while (totalWait < MAX_WAIT && Coordinator.hasOutstandingTasks) {
@@ -50,6 +47,19 @@ object Driver {
       totalWait += 1000;
     }
     log.info("All tasks complete. exiting")
+  }
+  
+  def scrapeMeet(meetId: String) {
+    try {
+      //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
+      //val meet = new Meet("http://swimmakos.com", "realtime")
+      val meet = new Meet("http://results.teamunify.com", meetId)
+      log.info("Scraping " + meet.name + ": " + meet.url)
+      Scraper.scrapeMeet(meet)
+
+    } catch {
+      case e: Exception => log.error("Error", e);
+    }    
   }
 }
 

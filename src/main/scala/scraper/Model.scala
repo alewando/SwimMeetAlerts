@@ -1,3 +1,4 @@
+package scraper
 import io.Source
 
 case class Meet(baseUrl: String, teamId: String) {
@@ -7,6 +8,7 @@ case class Meet(baseUrl: String, teamId: String) {
 
   def eventsPage = {
     val eventsUrl = url + "/evtindex.htm"
+    
     Source.fromURL(eventsUrl)
   }
 
