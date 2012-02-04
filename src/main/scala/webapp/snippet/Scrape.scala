@@ -7,6 +7,7 @@ import Helpers._
 import org.slf4j.LoggerFactory
 import net.liftweb.http._
 import scraper.Driver
+import net.liftweb.http.rest.RestHelper
 
 
 class Scrape {
@@ -15,7 +16,6 @@ class Scrape {
 	object meetId extends RequestVar("")
 	
 	def scrapeit(xhtml: NodeSeq) : NodeSeq = {
-	  log.error("SNIPPET2!");
 	  
 	  def doScrape() {
 	    log.info("I should be scraping "+meetId+" now");
@@ -25,5 +25,19 @@ class Scrape {
 	  bind("meet", xhtml,
 	      "meetid" -> SHtml.text(meetId, meetId(_)),
 	      "submit" -> SHtml.submit("Scrape", doScrape))
+	}
+
+}
+
+object Scrape extends RestHelper {
+  	val log = LoggerFactory.getLogger(this.getClass())
+
+  	// REST handler
+	serve {
+	  case "scrape" :: id :: _ XmlGet _=> { 
+	    log.info("REST: scrape "+id)
+	    Driver.scrapeMeet(id)
+	    <result></result>
+	  }
 	}
 }

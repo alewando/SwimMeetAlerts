@@ -9,6 +9,7 @@ import sitemap._
 import Loc._
 import mapper._
 import org.slf4j.LoggerFactory
+import webapp.snippet.Scrape
 
 //import code.model._
 
@@ -61,6 +62,8 @@ class LiftBootstrap extends Bootable {
     // Force the request to be UTF-8
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
 
+    // Add REST dispatches
+    LiftRules.statelessDispatchTable.append(Scrape)
   }
 
   // boot method from Lift sample app
