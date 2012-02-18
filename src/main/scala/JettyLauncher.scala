@@ -2,6 +2,7 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{DefaultServlet, ServletContextHandler}
 import org.eclipse.jetty.server.nio.SelectChannelConnector
 import net.liftweb.http.LiftFilter
+import org.eclipse.jetty.webapp.WebAppContext
 
 object JettyLauncher extends Application {
   
@@ -16,10 +17,12 @@ object JettyLauncher extends Application {
   server.setConnectors(Array(scc))
 
   //val context = new ServletContextHandler(server, "/", ServletContextHandler.NO_SESSIONS)
-  val context = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS)
-  context.addServlet(classOf[DefaultServlet], "/")
-  context.addFilter(classOf[LiftFilter], "/*", 0).setInitParameter("bootloader","lift.LiftBootstrap")
-  context.setResourceBase("src/main/webapp")
+  //val context = new ServletContextHandler(server, "/", ServletContextHandler.SESSIONS)
+  val context = new WebAppContext(server,"src/main/webapp","/");
+  context.setContextPath("/")
+  //context.addServlet(classOf[DefaultServlet], "/")
+  //context.addFilter(classOf[LiftFilter], "/*", 0).setInitParameter("bootloader","lift.LiftBootstrap")
+  //context.setResourceBase("src/main/webapp")
 
   server.start
   server.join

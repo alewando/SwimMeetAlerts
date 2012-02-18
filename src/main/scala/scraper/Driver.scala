@@ -8,13 +8,14 @@ import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHe
 import com.mongodb.casbah.Imports._
 import org.slf4j.LoggerFactory
 
-object DB {  
+object DB {
+  val log = LoggerFactory.getLogger(this.getClass());
   private val strUri = Option(System.getenv().get("MONGOLAB_URI")) getOrElse "mongodb://heroku_app2660393:c3btjte2421prcbe8qlfi7nn9u@ds029837.mongolab.com:29837/heroku_app2660393"
   
   if(strUri == null) {
-	LoggerFactory.getLogger(this.getClass()).error("No MongoDB URI set in MONGOLAB_URI environment variable")
-	
-  }  
+	throw new RuntimeException("No MongoDB URI set in MONGOLAB_URI environment variable")
+  }
+  log.info("Mongo DB URI="+strUri)
   private val uri = new com.mongodb.MongoURI(strUri)
   val db = MongoConnection(uri)("meetResults")
   if(uri.getUsername()!= null && uri.getPassword() != null) {
@@ -35,12 +36,13 @@ object Driver {
   EmailSender.start()
   Scraper.start()
 
+  //val DEFAULT_MEET_ID = "isfast";
+  //val DEFAULT_MEET_ID = "nkc";
+  val DEFAULT_MEET_ID = "ohmmr"
+
   def main(args: Array[String]) {
-    val meetId = "ohmmr";
-    //val meetId = "isfast";
-    //val meetId = "nkc";
-    
-    scrapeMeet(meetId)
+
+    scrapeMeet(DEFAULT_MEET_ID)
 
     var totalWait = 0;
     while (totalWait < MAX_WAIT && Coordinator.hasOutstandingTasks) {

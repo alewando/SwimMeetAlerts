@@ -11,6 +11,6 @@
   </root>
   
   <logger name="net.liftweb" level="TRACE"/>
-  <logger name="sraper" level="TRACE"/>
+  <logger name="scraper" level="TRACE"/>
   
 </configuration>
