@@ -19,7 +19,7 @@ object Scraper extends Actor {
       this ! event
     }
     log.info("Done scraping meet: " + meet.name)
-    this ! Stop
+    //this ! Stop
   }
 
   /**
