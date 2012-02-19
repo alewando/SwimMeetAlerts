@@ -1,0 +1,14 @@
+<div id="main" class="lift:surround?with=default;at=content">
+<lift:Dump.dumpResults>
+    <h2>Results</h2>
+    <table>
+        <tr lift:bind="resultList:results">
+            <td><result:name/></td>
+            <td><result:meet/></td>
+            <td><result:event/></td>
+            <td><result:finaltime/></td>
+        </tr>
+    </table>
+</lift:Dump.dumpResults>
+</div>
+

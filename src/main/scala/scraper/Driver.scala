@@ -1,4 +1,4 @@
-package scraper 
+package scraper
 
 import javax.mail.internet.{InternetAddress, MimeMessage}
 import javax.mail.{Address, Transport, Message, Session}
@@ -10,20 +10,42 @@ import org.slf4j.LoggerFactory
 
 object DB {
   val log = LoggerFactory.getLogger(this.getClass());
-  private val strUri = Option(System.getenv().get("MONGOLAB_URI")) getOrElse "mongodb://heroku_app2660393:c3btjte2421prcbe8qlfi7nn9u@ds029837.mongolab.com:29837/heroku_app2660393"
-  
-  if(strUri == null) {
-	throw new RuntimeException("No MongoDB URI set in MONGOLAB_URI environment variable")
+
+  var db: MongoDB = initializeDb
+
+  def initializeDb = {
+    val strUri = Option(System.getenv().get("MONGOLAB_URI")) getOrElse "mongodb://heroku_app2660393:c3btjte2421prcbe8qlfi7nn9u@ds029837.mongolab.com:29837/heroku_app2660393"
+
+    if (strUri == null) {
+      throw new RuntimeException("No MongoDB URI set in MONGOLAB_URI environment variable")
+    }
+    log.info("Mongo DB URI=" + strUri)
+    val uri = new com.mongodb.MongoURI(strUri)
+
+
+    try {
+      db = MongoConnection(uri)("meetResults")
+      if (uri.getUsername() != null && uri.getPassword() != null) {
+        db.authenticate(uri.getUsername(), new String(uri.getPassword()))
+      }
+    } catch {
+      case e => log.error("Error connecting to DB: " + e)
+    }
+    if(db == null) {
+      log.error("No DB connection")
+    }
+    db
   }
-  log.info("Mongo DB URI="+strUri)
-  private val uri = new com.mongodb.MongoURI(strUri)
-  val db = MongoConnection(uri)("meetResults")
-  if(uri.getUsername()!= null && uri.getPassword() != null) {
-    db.authenticate(uri.getUsername(), new String(uri.getPassword()))  
-  }
-  
-  def apply(x : String): MongoCollection = {
+
+  def apply(x: String): MongoCollection = {
+    if (db == null) {
+      db = initializeDb
+    }
     db(x)
+  }
+
+  def ping = {
+    db.stats
   }
 }
 
@@ -52,7 +74,7 @@ object Driver {
     }
     log.info("All tasks complete. exiting")
   }
-  
+
   def scrapeMeet(meetId: String) {
     try {
       //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
@@ -63,7 +85,7 @@ object Driver {
 
     } catch {
       case e: Exception => log.error("Error", e);
-    }    
+    }
   }
 }
 
@@ -143,7 +165,7 @@ object ResultProcessor extends Actor {
       builder += "seedTime" -> result.seedTime
       builder += "finalTime" -> result.finalTime
       val record = builder.result()
-      EmailSender ! (result, emailRecips)
+      EmailSender !(result, emailRecips)
       log.info("Adding new event record: " + record)
       coll += record
     }
@@ -190,7 +212,7 @@ object EmailSender extends Actor {
             Coordinator.taskFinished
           }
         case Stop => exit()
-        case _  => log.error("Unknown message")
+        case _ => log.error("Unknown message")
       }
     }
   }

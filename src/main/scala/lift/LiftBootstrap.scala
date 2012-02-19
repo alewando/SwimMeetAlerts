@@ -6,7 +6,7 @@ import http._
 import sitemap._
 import org.slf4j.LoggerFactory
 import webapp.snippet.Scrape
-import scraper.Scheduler
+import scraper.{DB, Scheduler}
 
 
 /**
@@ -23,7 +23,7 @@ class LiftBootstrap extends Bootable {
     LiftRules.addToPackages("webapp")
 
     // Build SiteMap
-    def sitemap(): SiteMap = SiteMap(Menu.i("Home") / "index", Menu.i("Scrape") / "scrape")
+    def sitemap(): SiteMap = SiteMap(Menu.i("Home") / "index", Menu.i("Scrape") / "scrape", Menu.i("Dump") / "dump")
 
     //def sitemapMutators = User.sitemapMutator
 
@@ -63,6 +63,9 @@ class LiftBootstrap extends Bootable {
 
     // Start the scheduler
     Scheduler.scheduleJobs
+    
+    // Ping the DB
+    DB.ping
 
   }
 
