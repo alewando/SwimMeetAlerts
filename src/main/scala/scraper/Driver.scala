@@ -1,20 +1,23 @@
 package scraper
 
 import javax.mail.internet.{InternetAddress, MimeMessage}
-import javax.mail.{Address, Transport, Message, Session}
 import scala.actors.Actor._
 import scala.actors.Actor
 import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import com.mongodb.casbah.Imports._
 import org.slf4j.LoggerFactory
+import java.util.Properties
+import javax.mail._
 
 object DB {
   val log = LoggerFactory.getLogger(this.getClass());
 
   var db: MongoDB = initializeDb
 
+  val DEFAULT_DB_URL = "mongodb://kobe:27017/meetResults"
+
   def initializeDb = {
-    val strUri = Option(System.getenv().get("MONGOLAB_URI")) getOrElse "mongodb://heroku_app2660393:c3btjte2421prcbe8qlfi7nn9u@ds029837.mongolab.com:29837/heroku_app2660393"
+    val strUri = Option(System.getenv().get("MONGOLAB_URI")) getOrElse DEFAULT_DB_URL
 
     if (strUri == null) {
       throw new RuntimeException("No MongoDB URI set in MONGOLAB_URI environment variable")
@@ -22,16 +25,15 @@ object DB {
     log.info("Mongo DB URI=" + strUri)
     val uri = new com.mongodb.MongoURI(strUri)
 
-
     try {
-      db = MongoConnection(uri)("meetResults")
+      db = MongoConnection(uri)(uri.getDatabase)
       if (uri.getUsername() != null && uri.getPassword() != null) {
         db.authenticate(uri.getUsername(), new String(uri.getPassword()))
       }
     } catch {
       case e => log.error("Error connecting to DB: " + e)
     }
-    if(db == null) {
+    if (db == null) {
       log.error("No DB connection")
     }
     db
@@ -190,6 +192,8 @@ object ResultProcessor extends Actor {
 
 object EmailSender extends Actor {
 
+  val SENDGRID_SMTP_SERVER = "smtp.sendgrid.net"
+
   val log = LoggerFactory.getLogger(this.getClass)
 
   val session = {
@@ -223,7 +227,7 @@ object EmailSender extends Actor {
     val message = new MimeMessage(session)
 
     // Set the from, to, subject, body text
-    message.setFrom(new InternetAddress("SwimMeetAlerts@alewando.com"))
+    message.setFrom(new InternetAddress("alert@swimmeetalerts.com"))
 
     val recipients: Array[Address] = recipientAddresses.map(new InternetAddress(_)).toArray
 
@@ -237,7 +241,28 @@ object EmailSender extends Actor {
       "Final time: " + result.finalTime + "\n";
     message.setText(body)
 
-    // And send it
-    Transport.send(message)
+    try {
+      sendMessage(message)
+    } catch {
+      case MessagingException =>
+        log.error("send failed, exception: " + _);
+    }
+  }
+
+  def sendMessage(msg: Message) = {
+    Properties props = new Properties();
+    val smtpUser = System.getenv("SENDGRID_USERNAME")
+    val smtpPassword = System.getenv("SENDGRID_PASSWORD")
+    val smtpServer = if (smtpUser == null) "localhost" else SENDGRID_SMTP_SERVER
+
+    props.put("mail.smtp.host", smtpServer);
+    props.put("mail.smtp.user", smtpUser);
+    props.put("mail.from", "alert@swimmeetalerts.com");
+    val sess = Session.getInstance(props, null);
+    val trans = sess.getTransport("smtps")
+    trans.connect(smtpServer, 25, smtpUser, smtpPassword)
+    trans.sendMessage(msg, msg.getAllRecipients())
+    trans.close()
+
   }
 }
