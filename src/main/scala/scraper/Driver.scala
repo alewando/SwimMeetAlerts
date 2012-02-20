@@ -244,13 +244,13 @@ object EmailSender extends Actor {
     try {
       sendMessage(message)
     } catch {
-      case MessagingException =>
-        log.error("send failed, exception: " + _);
+      case e =>
+        log.error("send failed, exception: " + e);
     }
   }
 
   def sendMessage(msg: Message) = {
-    Properties props = new Properties();
+    val props = new Properties();
     val smtpUser = System.getenv("SENDGRID_USERNAME")
     val smtpPassword = System.getenv("SENDGRID_PASSWORD")
     val smtpServer = if (smtpUser == null) "localhost" else SENDGRID_SMTP_SERVER
