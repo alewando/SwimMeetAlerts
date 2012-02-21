@@ -259,7 +259,7 @@ object EmailSender extends Actor {
     props.put("mail.smtp.user", smtpUser);
     props.put("mail.from", "alert@swimmeetalerts.com");
     val sess = Session.getInstance(props, null);
-    val trans = sess.getTransport("smtps")
+    val trans = sess.getTransport("smtp")
     trans.connect(smtpServer, 25, smtpUser, smtpPassword)
     trans.sendMessage(msg, msg.getAllRecipients())
     trans.close()
