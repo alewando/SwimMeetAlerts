@@ -23,6 +23,7 @@ libraryDependencies ++= Seq(
     "javax.mail" % "mail" % "1.4.1",
     "org.quartz-scheduler" % "quartz" % "2.1.3",
     "com.mongodb.casbah" %% "casbah" % "2.1.5-1",
+    "org.mongodb" % "mongo-java-driver" % "2.7.3",
     "org.slf4j" % "slf4j-api" % "1.6.1" withSources(),
     "org.mortbay.jetty" % "jetty" % "6.1.26" % "test",
     "junit" % "junit" % "4.7" % "test",
