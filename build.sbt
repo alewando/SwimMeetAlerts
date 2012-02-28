@@ -6,7 +6,6 @@ name := "SwimMeetAlerts"
 
 scalaVersion := "2.9.1"
 
-//seq(webSettings: _*)
 
 libraryDependencies ++= {
   val liftVersion = "2.4-M4" // Put the current/latest lift version here
@@ -14,8 +13,10 @@ libraryDependencies ++= {
     "org.eclipse.jetty" % "jetty-server" % "7.3.1.v20110307" % "compile->default",
     "org.eclipse.jetty" % "jetty-servlet" % "7.3.1.v20110307" % "compile->default",
     "org.eclipse.jetty" % "jetty-webapp" % "7.3.1.v20110307" % "compile->default",
-    "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default",
-    "net.liftweb" %% "lift-mapper" % liftVersion % "compile->default" withSources()
+    "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default" withSources(),
+    "net.liftweb" %% "lift-mapper" % liftVersion % "compile->default" withSources(),
+    "net.liftweb" %% "lift-mongodb" % liftVersion % "compile->default" withSources(),
+    "net.liftweb" %% "lift-mongodb-record" % liftVersion % "compile->default" withSources()
   )
 }
 
