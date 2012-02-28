@@ -14,17 +14,17 @@ object DB {
 
   var db: MongoDB = initializeDb
 
-  val DEFAULT_DB_URL = "mongodb://kobe:27017/meetResults"
-
-  def initializeDb = {
-    val strUri = Option(System.getenv().get("MONGOLAB_URI")) getOrElse DEFAULT_DB_URL
-
-    if (strUri == null) {
-      throw new RuntimeException("No MongoDB URI set in MONGOLAB_URI environment variable")
+  def uri = {
+    val DEFAULT_DB_URL = "mongodb://kobe:27017/meetResults"
+    val strUri = Option(System.getenv().get("MONGOLAB_URI")) getOrElse {
+      log.warn("No MongoDB URI set in MONGOLAB_URI environment variable, using default value of " + DEFAULT_DB_URL)
+      DEFAULT_DB_URL
     }
     log.info("Mongo DB URI=" + strUri)
-    val uri = new com.mongodb.MongoURI(strUri)
+    new com.mongodb.MongoURI(strUri)
+  }
 
+  def initializeDb = {
     try {
       db = MongoConnection(uri)(uri.getDatabase)
       if (uri.getUsername() != null && uri.getPassword() != null) {
