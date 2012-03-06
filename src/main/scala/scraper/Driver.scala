@@ -60,9 +60,12 @@ object Driver {
   EmailSender.start()
   Scraper.start()
 
+  val BASE_URL = Option(System.getenv().get("BASE_URL")) getOrElse "http://results.teamunify.com"
+
   //val DEFAULT_MEET_ID = "isfast";
   //val DEFAULT_MEET_ID = "nkc";
-  val DEFAULT_MEET_ID = "ohmmr"
+  //val DEFAULT_MEET_ID = "ohmmr";
+  val DEFAULT_MEET_ID = Option(System.getenv().get("MEET_ID")) getOrElse "meet1.1"
 
   def main(args: Array[String]) {
 
@@ -81,7 +84,7 @@ object Driver {
     try {
       //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
       //val meet = new Meet("http://swimmakos.com", "realtime")
-      val meet = new Meet("http://results.teamunify.com", meetId)
+      val meet = new Meet(BASE_URL, meetId)
       log.info("Scraping " + meet.name + ": " + meet.url)
       Scraper.scrapeMeet(meet)
 
