@@ -199,11 +199,16 @@ object EmailSender extends Actor {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val session = {
-    val properties = System.getProperties
-    properties.put("mail.smtp.host", "192.168.0.1")
-    Session.getDefaultInstance(properties)
+  val props = new Properties();
+  val smtpUser = System.getenv("SENDGRID_USERNAME")
+  val smtpPassword = System.getenv("SENDGRID_PASSWORD")
+  val smtpServer = if (smtpUser == null) "192.168.0.1" else SENDGRID_SMTP_SERVER
+  props.put("mail.smtp.host", smtpServer);
+  if (smtpUser != null) {
+    props.put("smail.smtp.user", smtpUser);
   }
+  props.put("mail.from", "alert@swimmeetalerts.com");
+  val session = Session.getInstance(props, null);
 
   def act() {
     loop {
@@ -253,19 +258,9 @@ object EmailSender extends Actor {
   }
 
   def sendMessage(msg: Message) = {
-    val props = new Properties();
-    val smtpUser = System.getenv("SENDGRID_USERNAME")
-    val smtpPassword = System.getenv("SENDGRID_PASSWORD")
-    val smtpServer = if (smtpUser == null) "localhost" else SENDGRID_SMTP_SERVER
-
-    props.put("mail.smtp.host", smtpServer);
-    props.put("mail.smtp.user", smtpUser);
-    props.put("mail.from", "alert@swimmeetalerts.com");
-    val sess = Session.getInstance(props, null);
-    val trans = sess.getTransport("smtp")
+    val trans = session.getTransport("smtp")
     trans.connect(smtpServer, 25, smtpUser, smtpPassword)
     trans.sendMessage(msg, msg.getAllRecipients())
     trans.close()
-
   }
 }
