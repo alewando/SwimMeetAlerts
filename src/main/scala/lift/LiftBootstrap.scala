@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 import webapp.snippet.Scrape
 import scraper.{DB, Scheduler}
 import com.mongodb.Mongo
-import webapp.model.User
+import model.User
 
 
 /**
