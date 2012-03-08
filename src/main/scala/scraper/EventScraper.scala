@@ -40,18 +40,8 @@ object Scraper extends Actor {
     loop {
       react {
         case event: Event => actor {
-          try {
-            Coordinator.taskStarted
-            log.debug("Scraper.react.event")
-            scrapeEvent(event)
-          } finally {
-            Coordinator.taskFinished
-          }
-        }
-        case Stop => {
-          log.debug("Scraper.react.stop")
-          ResultProcessor ! Stop
-          exit()
+          log.debug("Scraper.react.event")
+          scrapeEvent(event)
         }
       }
     }
@@ -71,7 +61,9 @@ object Scraper extends Actor {
           // Publish meesage to result processor
           ResultProcessor ! new Result(event, new Person(firstName.trim, lastName.trim), age.toInt, team.trim, place, seed, finals)
         // TODO: Save event as completed if all entrants have final results
-        case _ => if(log.isTraceEnabled()) { log.trace("Line: "+line) }
+        case _ => if (log.isTraceEnabled()) {
+          log.trace("Line: " + line)
+        }
       }
     } catch {
       case e: Exception => log.error("Error scraping event " + event.id + ": " + e)

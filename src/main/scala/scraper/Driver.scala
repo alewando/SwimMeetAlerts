@@ -1,9 +1,9 @@
 package scraper
 
+import config.Config._
 import javax.mail.internet.{InternetAddress, MimeMessage}
 import scala.actors.Actor._
 import scala.actors.Actor
-import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 import com.mongodb.casbah.Imports._
 import org.slf4j.LoggerFactory
 import java.util.Properties
@@ -15,7 +15,6 @@ object DB {
   var db: MongoDB = initializeDb
 
   def uri = {
-    val DEFAULT_DB_URL = "mongodb://kobe:27017/meetResults"
     val strUri = Option(System.getenv().get("MONGOLAB_URI")) getOrElse {
       log.warn("No MongoDB URI set in MONGOLAB_URI environment variable, using default value of " + DEFAULT_DB_URL)
       DEFAULT_DB_URL
@@ -55,30 +54,6 @@ object Driver {
   val log = LoggerFactory.getLogger(this.getClass)
   val MAX_WAIT = 60000
 
-  RegisterJodaTimeConversionHelpers()
-  ResultProcessor.start()
-  EmailSender.start()
-  Scraper.start()
-
-  val BASE_URL = Option(System.getenv().get("BASE_URL")) getOrElse "http://results.teamunify.com"
-
-  //val DEFAULT_MEET_ID = "isfast";
-  //val DEFAULT_MEET_ID = "nkc";
-  //val DEFAULT_MEET_ID = "ohmmr";
-  val DEFAULT_MEET_ID = Option(System.getenv().get("MEET_ID")) getOrElse "meet1.1"
-
-  def main(args: Array[String]) {
-
-    scrapeMeet(DEFAULT_MEET_ID)
-
-    var totalWait = 0;
-    while (totalWait < MAX_WAIT && Coordinator.hasOutstandingTasks) {
-      log.info("Waiting for tasks to complete");
-      Thread.sleep(1000);
-      totalWait += 1000;
-    }
-    log.info("All tasks complete. exiting")
-  }
 
   def scrapeMeet(meetId: String) {
     try {
@@ -95,33 +70,6 @@ object Driver {
 }
 
 /**
- * Tracks outstanding (still executing) tasks
- */
-object Coordinator {
-  var outstandingTasks = 0;
-  var taskCount = 0;
-
-  def taskStarted {
-    synchronized {
-      taskCount += 1;
-      outstandingTasks += 1;
-    }
-  }
-
-  def taskFinished {
-    synchronized {
-      outstandingTasks -= 1
-    }
-  }
-
-  def hasOutstandingTasks: Boolean = synchronized {
-    outstandingTasks > 0
-  };
-}
-
-case object Stop
-
-/**
  * Processes a scraped result record. Saves new results to DB and sends an email.
  */
 object ResultProcessor extends Actor {
@@ -131,16 +79,7 @@ object ResultProcessor extends Actor {
     loop {
       react {
         case result: Result => actor {
-          try {
-            Coordinator.taskStarted
-            handleResult(result)
-          } finally {
-            Coordinator.taskFinished
-          }
-        }
-        case Stop => {
-          EmailSender ! Stop
-          exit()
+          handleResult(result)
         }
       }
     }
@@ -195,35 +134,26 @@ object ResultProcessor extends Actor {
 
 object EmailSender extends Actor {
 
-  val SENDGRID_SMTP_SERVER = "smtp.sendgrid.net"
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   val props = new Properties();
-  val smtpUser = System.getenv("SENDGRID_USERNAME")
-  val smtpPassword = System.getenv("SENDGRID_PASSWORD")
-  val smtpServer = if (smtpUser == null) "192.168.0.1" else SENDGRID_SMTP_SERVER
-  props.put("mail.smtp.host", smtpServer);
-  if (smtpUser != null) {
-    props.put("smail.smtp.user", smtpUser);
+  props.put("mail.smtp.host", SMTP_SERVER);
+  if (SMTP_USER != null) {
+    props.put("mail.smtp.user", SMTP_USER);
   }
-  props.put("mail.from", "alert@swimmeetalerts.com");
   val session = Session.getInstance(props, null);
 
   def act() {
     loop {
       react {
         case (result: Result, recipients: List[String]) =>
-          Coordinator.taskStarted
           try {
             // TODO: Iterate over recipients, send separate email (or use BCC?)
             sendEmail(result, recipients)
           } catch {
             case e => log.error("Error sending email", e)
-          } finally {
-            Coordinator.taskFinished
           }
-        case Stop => exit()
         case _ => log.error("Unknown message")
       }
     }
@@ -235,7 +165,7 @@ object EmailSender extends Actor {
     val message = new MimeMessage(session)
 
     // Set the from, to, subject, body text
-    message.setFrom(new InternetAddress("alert@swimmeetalerts.com"))
+    message.setFrom(new InternetAddress(EMAIL_FROM_ADDRESS))
 
     val recipients: Array[Address] = recipientAddresses.map(new InternetAddress(_)).toArray
 
@@ -259,7 +189,7 @@ object EmailSender extends Actor {
 
   def sendMessage(msg: Message) = {
     val trans = session.getTransport("smtp")
-    trans.connect(smtpServer, 25, smtpUser, smtpPassword)
+    trans.connect(SMTP_SERVER, 25, SMTP_USER, SMTP_PASSWORD)
     trans.sendMessage(msg, msg.getAllRecipients())
     trans.close()
   }

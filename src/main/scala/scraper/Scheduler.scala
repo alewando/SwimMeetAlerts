@@ -1,5 +1,6 @@
 package scraper
 
+import config.Config
 import org.quartz.impl.StdSchedulerFactory
 import org.quartz._
 import org.slf4j.LoggerFactory
@@ -15,7 +16,7 @@ object Scheduler {
 
 
     val trigger = TriggerBuilder.newTrigger()
-      .withIdentity("trigger1", "group1")
+      .withIdentity("scrapeTrigger", "group1")
       .withSchedule(SimpleScheduleBuilder.simpleSchedule()
       .withIntervalInMinutes(10)
       .repeatForever())
@@ -31,6 +32,6 @@ class ScraperJob extends Job {
 
   override def execute(ctx: JobExecutionContext) {
     log.debug("Running scraper job")
-    Driver.scrapeMeet(Driver.DEFAULT_MEET_ID)
+    Driver.scrapeMeet(Config.DEFAULT_MEET_ID)
   }
 }

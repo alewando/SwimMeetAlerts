@@ -7,9 +7,10 @@ import mongodb.{DefaultMongoIdentifier, MongoDB}
 import sitemap._
 import org.slf4j.LoggerFactory
 import webapp.snippet.Scrape
-import scraper.{DB, Scheduler}
 import com.mongodb.Mongo
 import model.User
+import scraper.{ResultProcessor, EmailSender, Scraper, DB, Scheduler}
+import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
 
 
 /**
@@ -69,6 +70,12 @@ class LiftBootstrap extends Bootable {
     // Configure the database
     configDb
 
+    // Start actors
+    ResultProcessor.start()
+    EmailSender.start()
+    Scraper.start()
+
+
     // Start the scheduler
     Scheduler.scheduleJobs
 
@@ -79,6 +86,8 @@ class LiftBootstrap extends Bootable {
 
 
   def configDb {
+    RegisterJodaTimeConversionHelpers()
+
     val uri = DB.uri
     if (uri.getUsername != null) {
       MongoDB.defineDbAuth(DefaultMongoIdentifier, new Mongo(uri), uri.getDatabase, uri.getUsername, new String(uri.getPassword))
