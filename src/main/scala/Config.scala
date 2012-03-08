@@ -12,4 +12,10 @@ object Config {
   val SMTP_SERVER = if (SMTP_USER == null) "192.168.0.1" else "smtp.sendgrid.net"
   val EMAIL_FROM_ADDRESS = "alert@swimmeetalerts.com";
 
+
+  def DATABASE_URL = {
+    val strUri = Option(System.getenv().get("MONGOLAB_URI")) getOrElse DEFAULT_DB_URL
+    new com.mongodb.MongoURI(strUri)
+  }
+
 }

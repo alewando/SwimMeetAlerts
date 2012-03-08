@@ -1,5 +1,6 @@
 package lift
 
+import config.Config
 import net.liftweb._
 import common._
 import http._
@@ -9,8 +10,7 @@ import org.slf4j.LoggerFactory
 import webapp.snippet.Scrape
 import com.mongodb.Mongo
 import model.User
-import scraper.{ResultProcessor, EmailSender, Scraper, DB, Scheduler}
-import com.mongodb.casbah.commons.conversions.scala.RegisterJodaTimeConversionHelpers
+import scraper.{ResultProcessor, EmailSender, Scraper, Scheduler}
 
 
 /**
@@ -68,31 +68,26 @@ class LiftBootstrap extends Bootable {
     LiftRules.statelessDispatchTable.append(Scrape)
 
     // Configure the database
-    configDb
+    initDb
 
     // Start actors
     ResultProcessor.start()
     EmailSender.start()
     Scraper.start()
 
-
     // Start the scheduler
     Scheduler.scheduleJobs
-
-    // Ping the DB
-    DB.ping
-
   }
 
 
-  def configDb {
-    RegisterJodaTimeConversionHelpers()
-
-    val uri = DB.uri
-    if (uri.getUsername != null) {
-      MongoDB.defineDbAuth(DefaultMongoIdentifier, new Mongo(uri), uri.getDatabase, uri.getUsername, new String(uri.getPassword))
+  def initDb {
+    val url = Config.DATABASE_URL
+    log.info("Mongo DB URL=" + url
+    )
+    if (url.getUsername != null) {
+      MongoDB.defineDbAuth(DefaultMongoIdentifier, new Mongo(url), url.getDatabase, url.getUsername, new String(url.getPassword))
     } else {
-      MongoDB.defineDb(DefaultMongoIdentifier, new Mongo(uri), uri.getDatabase)
+      MongoDB.defineDb(DefaultMongoIdentifier, new Mongo(url), url.getDatabase)
     }
   }
 

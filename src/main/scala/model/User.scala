@@ -2,12 +2,12 @@ package model
 
 import webapp.lib.{MetaMegaProtoUser, MegaProtoUser}
 import xml.Elem
+import net.liftweb.mongodb.record.field.MongoListField
 
 class User extends MegaProtoUser[User] {
   def meta = User
 
-  val b: Elem = <foo>bar</foo>
-
+  object watching extends MongoListField[User, Swimmer](this)
 }
 
 object User extends User with MetaMegaProtoUser[User] {
