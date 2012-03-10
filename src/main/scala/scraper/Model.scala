@@ -1,4 +1,5 @@
 package scraper
+
 import io.Source
 
 case class Meet(baseUrl: String, teamId: String) {
@@ -8,7 +9,7 @@ case class Meet(baseUrl: String, teamId: String) {
 
   def eventsPage = {
     val eventsUrl = url + "/evtindex.htm"
-    
+
     Source.fromURL(eventsUrl)
   }
 
@@ -25,7 +26,7 @@ case class Meet(baseUrl: String, teamId: String) {
   }
 }
 
-case class Event(id: String, meet:Meet, name: String, url:String)
+case class Event(id: String, meet: Meet, name: String, url: String)
 
 case class Person(firstName: String, lastName: String) {
   def fullName: String = {
@@ -33,4 +34,4 @@ case class Person(firstName: String, lastName: String) {
   }
 }
 
-case class Result(event: Event, entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String)
+case class ScrapedResult(event: Event, entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String)

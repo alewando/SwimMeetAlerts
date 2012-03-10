@@ -18,7 +18,7 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
 object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
   val log = LoggerFactory.getLogger(this.getClass)
 
-  def findForResult(result: scraper.Result) = {
+  def findForResult(result: scraper.ScrapedResult) = {
     Swimmer.find(("name.firstName" -> result.entrant.firstName) ~ ("name.lastName" -> result.entrant.lastName))
   }
 }
@@ -35,6 +35,10 @@ class Name extends BsonRecord[Name] {
   object lastName extends StringField(this, 100)
 
   // TODO: Middle initial
+
+  def fullName: String = {
+    firstName + " " + lastName;
+  }
 
 }
 

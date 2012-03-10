@@ -18,8 +18,7 @@ object Scraper extends Actor {
       log.debug("Sending message for event: " + event.id)
       this ! event
     }
-    log.info("Done scraping meet: " + meet.name)
-    //this ! Stop
+    log.info("Done scraping meet: {}", meet.name)
   }
 
   /**
@@ -40,7 +39,6 @@ object Scraper extends Actor {
     loop {
       react {
         case event: Event => actor {
-          log.debug("Scraper.react.event")
           scrapeEvent(event)
         }
       }
@@ -58,16 +56,15 @@ object Scraper extends Actor {
       for (line <- page.getLines(); m <- EntrantPattern findAllIn line) m match {
         case EntrantPattern(place, lastName, firstName, age, team, seed, finals) =>
           // TODO: Strip trailing initial from first name if present (ie: "Fred A")
-          // Publish meesage to result processor
-          ResultProcessor ! new Result(event, new Person(firstName.trim, lastName.trim), age.toInt, team.trim, place, seed, finals)
+          // Publish meesage to scrapedResult processor
+          ResultProcessor ! new ScrapedResult(event, new Person(firstName.trim, lastName.trim), age.toInt, team.trim, place, seed, finals)
         // TODO: Save event as completed if all entrants have final results
-        case _ => if (log.isTraceEnabled()) {
-          log.trace("Line: " + line)
-        }
+        case _ =>
+          log.trace("Line: {}", line)
       }
     } catch {
       case e: Exception => log.error("Error scraping event " + event.id + ": " + e)
     }
-    log.debug("Done scraping event " + event.id)
+    log.debug("Done scraping event {}", event.id)
   }
 }

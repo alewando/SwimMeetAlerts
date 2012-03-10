@@ -7,7 +7,8 @@ import scala.actors.Actor
 import org.slf4j.LoggerFactory
 import java.util.Properties
 import javax.mail._
-import model.Swimmer
+import model.{Result, Swimmer}
+import net.liftweb.mongodb.BsonDSL._
 
 //TODO: Make Driver an actor
 object Driver {
@@ -30,7 +31,7 @@ object Driver {
 }
 
 /**
- * Processes a scraped result record. Saves new results to DB and sends an email.
+ * Processes a scraped scrapedResult record. Saves new results to DB and sends an email.
  */
 object ResultProcessor extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
@@ -38,30 +39,28 @@ object ResultProcessor extends Actor {
   def act() {
     loop {
       react {
-        case result: Result => actor {
+        case result: ScrapedResult => actor {
           handleResult(result)
         }
       }
     }
   }
 
-  def handleResult(result: Result) {
-    log.debug(result.toString);
+  def handleResult(scrapedResult: ScrapedResult) {
+    log.debug(scrapedResult.toString);
 
-    // See if this result is for a swimmer being watched
-    val swimmer = Swimmer.findForResult(result) openOr {
+    // See if this scrapedResult is for a swimmer being watched
+    val swimmer = Swimmer.findForResult(scrapedResult) openOr {
       return
     }
-    log.debug("!!!!!!!!!!!!!!!!!!!! FOUND RESULT FOR TRACKED SWIMMER: " + result)
+    log.debug("!!!!!!!!!!!!!!!!!!!! FOUND RESULT FOR TRACKED SWIMMER: " + scrapedResult)
 
-    // TODO: Look for existing result in DB
-    val exists = false
-    if (exists) {
-      log.debug("Not replacing existing event record for event " + result.event.name)
-    } else {
-      // Create and save new result record
-      log.info("Saving new result: {}", result)
-      model.Result.createRecord.swimmer(swimmer.id.is).meet(result.event.meet.name).event(result.event.name).age(result.age).team(result.team).seedTime(result.seedTime).finalTime(result.finalTime).save
+    // TODO: Look for existing scrapedResult in DB
+    val existing = Result.find(("swimmer" -> swimmer.id.is) ~ ("event" -> scrapedResult.event.name) ~ ("meet" -> scrapedResult.event.meet.name))
+    existing openOr {
+      // Create and save new scrapedResult record
+      log.info("Saving new scrapedResult: {}", scrapedResult)
+      val result = model.Result.createRecord.swimmer(swimmer.id.is).meet(scrapedResult.event.meet.name).event(scrapedResult.event.name).age(scrapedResult.age).team(scrapedResult.team).seedTime(scrapedResult.seedTime).finalTime(scrapedResult.finalTime).save
 
       // Get emails for swimmer's watchers
       val emailRecips = getEmailRecipientsForSwimmer(swimmer) match {
@@ -77,7 +76,7 @@ object ResultProcessor extends Actor {
     //val coll = DB("personEmail")
 
     var res: List[String] = Nil
-    //    coll.findOne(MongoDBObject("name" -> result.entrant.fullName)).foreach {
+    //    coll.findOne(MongoDBObject("name" -> scrapedResult.entrant.fullName)).foreach {
     //      x =>
     //        res = x.as[BasicDBList]("emailRecipients").toList collect {
     //          case s: String => s
@@ -126,13 +125,14 @@ object EmailSender extends Actor {
     val recipients: Array[Address] = recipientAddresses.map(new InternetAddress(_)).toArray
 
     message.setRecipients(Message.RecipientType.TO, recipients)
-    message.setSubject("New result for " + result.entrant.fullName + ": " + result.event.name)
-    val body = result.entrant.fullName + "\n" +
-      result.event.meet.name + "\n" +
-      result.event.name + "\n" +
-      "Place: " + result.place + "\n" +
-      "Seed time: " + result.seedTime + "\n" +
-      "Final time: " + result.finalTime + "\n";
+    val swimmer = result.swimmer.obj.openTheBox
+    message.setSubject("New scrapedResult for " + swimmer + ": " + result.event.name)
+    val body = swimmer.name.value.fullName + "\n" +
+      result.meet.is + "\n" +
+      result.event.is + "\n" +
+      "Place: " + result.place.is + "\n" +
+      "Seed time: " + result.seedTime.is + "\n" +
+      "Final time: " + result.finalTime.is + "\n";
     message.setText(body)
 
     try {

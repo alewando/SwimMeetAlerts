@@ -13,7 +13,7 @@ class Dump {
   //    def bindResults(template: NodeSeq): NodeSeq = {
   //      recs.flatMap{
   //        case ResultRecord(firstName, lastName, meet, event, age, team, seedTime, finalTime) =>
-  //          bind("result", template, "name" -> firstName, "meet" -> meet, "event" -> event, "finaltime" -> finalTime)
+  //          bind("scrapedResult", template, "name" -> firstName, "meet" -> meet, "event" -> event, "finaltime" -> finalTime)
   //      } toSeq
   //    }
   //    bind("resultList", xhtml, "results" -> bindResults _)
