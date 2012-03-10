@@ -9,8 +9,8 @@ import sitemap._
 import org.slf4j.LoggerFactory
 import webapp.snippet.Scrape
 import com.mongodb.Mongo
-import model.User
 import scraper.{ResultProcessor, EmailSender, Scraper, Scheduler}
+import model.User
 
 
 /**
@@ -77,6 +77,7 @@ class LiftBootstrap extends Bootable {
 
     // Start the scheduler
     Scheduler.scheduleJobs
+
   }
 
 

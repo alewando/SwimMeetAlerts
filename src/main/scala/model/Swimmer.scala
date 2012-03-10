@@ -3,7 +3,8 @@ package model
 import net.liftweb.mongodb.record.{BsonMetaRecord, BsonRecord, MongoMetaRecord, MongoRecord}
 import net.liftweb.record.field.StringField
 import net.liftweb.mongodb.record.field.{BsonRecordField, MongoListField, ObjectIdPk}
-import scraper.{Person}
+import org.slf4j.LoggerFactory
+import net.liftweb.mongodb.BsonDSL._
 
 class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   def meta = Swimmer
@@ -15,14 +16,10 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
 }
 
 object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
+  val log = LoggerFactory.getLogger(this.getClass)
+
   def findForResult(result: scraper.Result) = {
-    //TODO: Implement serach by result first/last name
-    result match {
-      case scraper.Result(_, Person("Jordan", "Carman"), _, _, _, _, _) => Swimmer.find(
-        "{name: {firstName: 'Jordan', lastName: 'Carman'}}") getOrElse null
-      case _ => null
-    }
-    null
+    Swimmer.find(("name.firstName" -> result.entrant.firstName) ~ ("name.lastName" -> result.entrant.lastName))
   }
 }
 
@@ -31,7 +28,9 @@ class Name extends BsonRecord[Name] {
 
   object firstName extends StringField(this, 100)
 
-  object middleName extends StringField(this, 100)
+  object middleName extends StringField(this, 100) {
+    override def optional_? = true
+  }
 
   object lastName extends StringField(this, 100)
 
