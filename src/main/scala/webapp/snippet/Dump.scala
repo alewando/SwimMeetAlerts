@@ -1,21 +1,44 @@
 package webapp.snippet
 
+import xml.NodeSeq
+import net.liftweb.util.Helpers._
+import org.slf4j.LoggerFactory
+import net.liftweb.http.SHtml
+import model.{User, Swimmer}
+import net.liftweb.mongodb.BsonDSL._
 
 class Dump {
 
-  case class ResultRecord(firstName: String, lastName: String, meet: String, event: String, age: Integer, team: String, seedTime: String, finalTime: String)
+  val log = LoggerFactory.getLogger(getClass())
 
-  //  def dumpresults(xhtml: NodeSeq): NodeSeq = {
-  //    val recs = for {dbo <- DB("personResults")} yield
-  //      new ResultRecord(
-  //        dbo.as[String]("firstName"), dbo.as[String]("lastName"), dbo.as[String]("meet"), dbo.as[String]("event"), dbo.as[Integer]("age"), dbo.as[String]("team"), dbo.as[String]("seedTime"), dbo.as[String]("finalTime"))
-  //
-  //    def bindResults(template: NodeSeq): NodeSeq = {
-  //      recs.flatMap{
-  //        case ResultRecord(firstName, lastName, meet, event, age, team, seedTime, finalTime) =>
-  //          bind("scrapedResult", template, "name" -> firstName, "meet" -> meet, "event" -> event, "finaltime" -> finalTime)
-  //      } toSeq
-  //    }
-  //    bind("resultList", xhtml, "results" -> bindResults _)
-  //  }
+  def testform(xhtml: NodeSeq): NodeSeq = {
+
+    def processSubmit() {
+      log.error("!!!! processSubmit clicked")
+    }
+
+    log.info("testform snippet")
+    bind("test", xhtml, "submit" -> SHtml.submit("Submit", processSubmit))
+  }
+
+  def dumpswimmers(xhtml: NodeSeq): NodeSeq = {
+
+    Swimmer.findAll.flatMap {
+      swimmer => bindSwimmer(swimmer, xhtml)
+    }
+  }
+
+  def bindSwimmer(swimmer: Swimmer, xhtml: NodeSeq): NodeSeq = {
+
+    def processWatch() {
+      log.warn("Processing submission. swimmer: {}", swimmer)
+      val select = ("_id" -> swimmer.id.is)
+      val update = ("$addToSet" ->("watchers", User.currentUser.openTheBox.id))
+      log.warn("select: {}, update: {}", select, update)
+      Swimmer.update(select, update)
+    }
+
+    bind("swimmer", xhtml, "name" -> swimmer.name.is.fullName, "submit" -> SHtml.submit("Watch", processWatch))
+  }
+
 }

@@ -47,19 +47,19 @@ object ResultProcessor extends Actor {
   }
 
   def handleResult(scrapedResult: ScrapedResult) {
-    log.debug(scrapedResult.toString);
+    log.trace("{}", scrapedResult);
 
     // See if this scrapedResult is for a swimmer being watched
     val swimmer = Swimmer.findForResult(scrapedResult) openOr {
       return
     }
-    log.debug("!!!!!!!!!!!!!!!!!!!! FOUND RESULT FOR TRACKED SWIMMER: " + scrapedResult)
+    log.debug("Result for tracked swimmer: " + scrapedResult)
 
     // TODO: Look for existing scrapedResult in DB
     val existing = Result.find(("swimmer" -> swimmer.id.is) ~ ("event" -> scrapedResult.event.name) ~ ("meet" -> scrapedResult.event.meet.name))
     existing openOr {
       // Create and save new scrapedResult record
-      log.info("Saving new scrapedResult: {}", scrapedResult)
+      log.info("Saving new scrapedResult for tracked swimmer: {}", scrapedResult)
       val result = model.Result.createRecord.swimmer(swimmer.id.is).meet(scrapedResult.event.meet.name).event(scrapedResult.event.name).age(scrapedResult.age).team(scrapedResult.team).seedTime(scrapedResult.seedTime).finalTime(scrapedResult.finalTime).save
 
       // Get emails for swimmer's watchers
@@ -73,23 +73,13 @@ object ResultProcessor extends Actor {
 
   def getEmailRecipientsForSwimmer(swimmer: Swimmer): List[String] = {
     // TODO: Look up email recipients (swimmer -> watchers -*> email)
-    //val coll = DB("personEmail")
-
-    var res: List[String] = Nil
-    //    coll.findOne(MongoDBObject("name" -> scrapedResult.entrant.fullName)).foreach {
-    //      x =>
-    //        res = x.as[BasicDBList]("emailRecipients").toList collect {
-    //          case s: String => s
-    //        }
-    //    }
-
-    res
+    val emails = for {watcher <- swimmer.watchers.is} yield watcher.email.is
+    log.info("Emails for swimmer {}: {}", swimmer.name.value.fullName, emails)
+    emails
   }
 }
 
 object EmailSender extends Actor {
-
-
   val log = LoggerFactory.getLogger(this.getClass)
 
   val props = new Properties();

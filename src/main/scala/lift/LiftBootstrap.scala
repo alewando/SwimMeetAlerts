@@ -26,7 +26,7 @@ class LiftBootstrap extends Bootable {
     // where to search snippet
     LiftRules.addToPackages("webapp")
 
-    def sitemap(): SiteMap = SiteMap(Menu.i("Home") / "index", Menu.i("Scrape") / "scrape", Menu.i("Dump") / "dump" >> User.AddUserMenusAfter)
+    def sitemap(): SiteMap = SiteMap(Menu.i("Home") / "index", Menu.i("Scrape") / "scrape", Menu.i("Swimmers") / "swimmers" >> User.AddUserMenusAfter)
 
     def sitemapMutators = User.sitemapMutator
 
