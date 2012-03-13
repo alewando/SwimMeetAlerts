@@ -4,9 +4,9 @@
     <meta name="description" content=""/>
     <meta name="keywords" content=""/>
     <title>SwimMeetAlerts</title>
+    <script type="text/javascript" src="/classpath/jquery.js"></script>
     <style class="lift:CSS.blueprint"></style>
     <style class="lift:CSS.fancyType"></style>
-    <script type="text/javascript" src="/classpath/jquery.js"></script>
 </head>
 <body>
 <div class="container">
@@ -15,19 +15,16 @@
                                            style="display:none; margin-bottom: 0px; margin-left: 5px"
                                            src="/images/ajax-loader.gif"/></h1>
     </div>
-
     <hr/>
-
+    <div class="error lift:Notices?showAll=true"></div>
     <div class="column span-6 colborder sidebar">
         <hr class="space"/>
         <span class="lift:Menu.builder"/>
-        <!-- <div class="lift:Msgs?showAll=true"/> -->
         <hr class="space"/>
     </div>
 
     <div class="column span-17 last">
         <div id="content">
-            <!-- HTML content will be inserted here -->
         </div>
     </div>
 
