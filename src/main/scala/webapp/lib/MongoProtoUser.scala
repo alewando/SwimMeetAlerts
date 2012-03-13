@@ -297,7 +297,6 @@ trait MetaMegaProtoUser[ModelType <: MegaProtoUser[ModelType]] extends MongoMeta
     /**
      * Set the unique ID for this user to a new value
      */
-    //TODO
     def resetUniqueId(): TheUserType = {
       in
     }
