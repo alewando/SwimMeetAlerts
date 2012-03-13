@@ -1,0 +1,25 @@
+<div id="main" class="lift:surround?with=default;at=content">
+    <h2>Swimmers</h2>
+
+    <div class="lift:Swimmers.listswimmers?form=POST">
+        Name:
+        <swimmer:name></swimmer:name>
+        <swimmer:submit></swimmer:submit>
+    </div>
+
+
+    <h3>Add Swimmer</h3>
+
+    <div class="lift:Swimmers.addswimmer?form=POST">
+        <div>First Name:
+            <swimmer:firstname>First</swimmer:firstname>
+        </div>
+        <div>Last Name:
+            <swimmer:lastname>Last</swimmer:lastname>
+        </div>
+        <div>
+            <swimmer:submit>Add</swimmer:submit>
+        </div>
+    </div>
+</div>
+

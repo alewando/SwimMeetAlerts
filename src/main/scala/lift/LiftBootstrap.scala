@@ -11,7 +11,7 @@ import webapp.snippet.Scrape
 import com.mongodb.Mongo
 import scraper.{ResultProcessor, EmailSender, Scraper, Scheduler}
 import model.User
-
+import net.liftweb.sitemap.Loc._
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -26,13 +26,14 @@ class LiftBootstrap extends Bootable {
     // where to search snippet
     LiftRules.addToPackages("webapp")
 
-    def sitemap(): SiteMap = SiteMap(Menu.i("Home") / "index", Menu.i("Scrape") / "scrape", Menu.i("Swimmers") / "swimmers" >> User.AddUserMenusAfter)
-
-    def sitemapMutators = User.sitemapMutator
+    def sitemap(): SiteMap = SiteMap(
+      Menu(Loc("Utils", ("util" :: Nil) -> true, "Utils", Hidden)),
+      Menu.i("Home") / "index"
+        >> User.AddUserMenusAfter)
 
     // set the sitemap.  Note if you don't want access control for
     // each page, just comment this line out.
-    LiftRules.setSiteMapFunc(() => sitemapMutators(sitemap))
+    LiftRules.setSiteMapFunc(() => User.sitemapMutator(sitemap))
 
     // What is the function to test if a user is logged in?
     LiftRules.loggedInTest = Full(() => User.loggedIn_?)
