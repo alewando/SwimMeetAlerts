@@ -7,8 +7,9 @@ import scala.actors.Actor
 import org.slf4j.LoggerFactory
 import java.util.Properties
 import javax.mail._
-import model.{Result, Swimmer}
 import net.liftweb.mongodb.BsonDSL._
+import model.{User, Result, Swimmer}
+import org.bson.types.ObjectId
 
 //TODO: Make Driver an actor
 object Driver {
@@ -73,9 +74,13 @@ object ResultProcessor extends Actor {
 
   def getEmailRecipientsForSwimmer(swimmer: Swimmer): List[String] = {
     // TODO: Look up email recipients (swimmer -> watchers -*> email)
-    val emails = for {watcher <- swimmer.watchers.is} yield watcher.email.is
-    log.info("Emails for swimmer {}: {}", swimmer.name.value.fullName, emails)
-    emails
+//    val emails = for {watcherId: ObjectId <- swimmer.watchers.value}
+//    yield User.find(watcherId) map {
+//      _.email.is
+//    }
+//    log.info("Emails for swimmer {}: {}", swimmer.name.value.fullName, emails)
+//    emails
+      Nil
   }
 }
 
