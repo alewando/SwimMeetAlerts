@@ -6,20 +6,11 @@ import org.slf4j.LoggerFactory
 import net.liftweb.mongodb.BsonDSL._
 import net.liftweb.http.{RequestVar, SHtml}
 import model.{Name, User, Swimmer}
+import org.bson.types.ObjectId
 
 class Swimmers {
 
   val log = LoggerFactory.getLogger(getClass())
-
-  def testform(xhtml: NodeSeq): NodeSeq = {
-
-    def processSubmit() {
-      log.error("!!!! processSubmit clicked")
-    }
-
-    log.info("testform snippet")
-    bind("test", xhtml, "submit" -> SHtml.submit("Submit", processSubmit))
-  }
 
   def listswimmers(xhtml: NodeSeq): NodeSeq = {
     Swimmer.findAll.flatMap {
@@ -30,11 +21,11 @@ class Swimmers {
   def bindSwimmer(swimmer: Swimmer, xhtml: NodeSeq): NodeSeq = {
 
     def processWatch() {
-      log.warn("Processing submission. swimmer: {}", swimmer)
-      val select = ("_id" -> swimmer.id.is)
-      val update = ("$addToSet" ->("watchers", User.currentUser.openTheBox.id))
-      log.warn("select: {}, update: {}", select, update)
-      Swimmer.update(select, update)
+      val currentUser = User.currentUser.openTheBox
+      Swimmer.update(("_id" -> swimmer.id.is), ("$addToSet" ->("watchers", currentUser.id)))
+      val upd = ("$addToSet" ->("watching", swimmer.id.is.asInstanceOf[ObjectId]))
+      User.update(("_id" -> currentUser.id), upd)
+      log.info("User {} now watching swimmer: {}", currentUser.shortName, swimmer)
     }
 
     bind("swimmer", xhtml, "name" -> swimmer.name.is.fullName, "submit" -> SHtml.submit("Watch", processWatch))
