@@ -2,10 +2,10 @@ package model
 
 import net.liftweb.mongodb.record.{BsonMetaRecord, BsonRecord, MongoMetaRecord, MongoRecord}
 import net.liftweb.record.field.StringField
-import net.liftweb.mongodb.record.field.{BsonRecordField, MongoListField, ObjectIdPk}
 import org.slf4j.LoggerFactory
 import net.liftweb.mongodb.BsonDSL._
 import org.bson.types.ObjectId
+import net.liftweb.mongodb.record.field.{ObjectIdRefField, BsonRecordField, MongoListField, ObjectIdPk}
 
 class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   def meta = Swimmer
@@ -14,7 +14,7 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
 
   object name extends BsonRecordField(this, Name)
 
-  object watchers extends MongoListField[Swimmer, User](this)
+  object watchers extends MongoListField[Swimmer, ObjectId](this)
 
   def addWatcher(user: User) {
     Swimmer.update(("_id" -> this.id.is), ("$addToSet" ->("watchers", user.id.asInstanceOf[ObjectId])))
