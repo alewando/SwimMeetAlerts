@@ -3,10 +3,8 @@ package webapp.snippet
 import xml.NodeSeq
 import net.liftweb.util.Helpers._
 import org.slf4j.LoggerFactory
-import net.liftweb.mongodb.BsonDSL._
 import net.liftweb.http.{RequestVar, SHtml}
 import model.{Name, User, Swimmer}
-import org.bson.types.ObjectId
 
 class Swimmers {
 
@@ -22,10 +20,7 @@ class Swimmers {
 
     def processWatch() {
       val currentUser = User.currentUser.openTheBox
-      Swimmer.update(("_id" -> swimmer.id.is), ("$addToSet" ->("watchers", currentUser.id)))
-      val upd = ("$addToSet" ->("watching", swimmer.id.is.asInstanceOf[ObjectId]))
-      User.update(("_id" -> currentUser.id), upd)
-      log.info("User {} now watching swimmer: {}", currentUser.shortName, swimmer)
+      swimmer.addWatcher(currentUser)
     }
 
     bind("swimmer", xhtml, "name" -> swimmer.name.is.fullName, "submit" -> SHtml.submit("Watch", processWatch))
