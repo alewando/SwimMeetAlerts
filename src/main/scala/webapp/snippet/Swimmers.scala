@@ -32,7 +32,7 @@ class Swimmers {
 
     def processAdd() {
       log.info("Adding swimmer. first={}, last={}", firstName.is, lastName.is)
-      Swimmer.createRecord.name(Name.createRecord.firstName(firstName.is).lastName(lastName.is)).save
+      Swimmer.createForName(firstName.is, lastName.is)
     }
 
     bind("swimmer", xhtml,

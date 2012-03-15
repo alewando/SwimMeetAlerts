@@ -27,24 +27,32 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
 }
 
 object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
-  val Name = """(\w+) (\w){1} (\w+)""".r
-
-  def findForResult(result: scraper.ScrapedResult) : Box[Swimmer] = {
+  val NamePattern = """(\w+) (\w){1} (\w+)""".r
+  
+  def createForName(firstName: String, lastName: String) : Swimmer = {
+    createRecord.name(Name.createRecord.firstName(firstName).lastName(lastName)).save
+  }
+  
+  def findForName(fullName : String) : Box[Swimmer] = {
     // Search by upper-cased name
-    val searchName = result.entrant.fullName.toUpperCase
+    val searchName = fullName.toUpperCase
     //log.debug("Searching for {}",searchName)
-    Swimmer.find("name.searchName" -> searchName) match {
+    find("name.searchName" -> searchName) match {
       case Full(x) => Full(x)
       case _ => {
         searchName match {
-          case Name(first, mi, last) => {
+          case NamePattern(first, mi, last) => {
             //log.debug("Searching for name w/o MI: {} {}", first, last)
-            Swimmer.find("name.searchName" -> first + " " + last)
+            find("name.searchName" -> first + " " + last)
           }
           case _ => Empty
         }
       }
-    }
+    }  
+  }
+
+  def findForResult(result: scraper.ScrapedResult) : Box[Swimmer] = {
+    findForName(result.entrant.fullName)
   }
 }
 

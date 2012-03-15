@@ -9,7 +9,7 @@ import sitemap._
 import org.slf4j.LoggerFactory
 import webapp.snippet.Scrape
 import net.liftweb.sitemap.Loc._
-import model.{Swimmer, User}
+import model.User
 import com.mongodb.Mongo
 import scraper.{Scheduler, ResultProcessor, EmailSender, Scraper}
 
@@ -26,10 +26,14 @@ class LiftBootstrap extends Bootable {
     // where to search snippet
     LiftRules.addToPackages("webapp")
 
+    val isAdmin = If(() => User.superUser_?, () => RedirectResponse("/"))
+    val utilMenu = Menu(Loc("Utils", ("util" :: Nil) -> true, "Utils", isAdmin),
+      Menu(Loc("swimmers", ("util"::"swimmers"::Nil)->false, "List Swimmers")))
+
     def sitemap(): SiteMap = SiteMap(
-      Menu(Loc("Utils", ("util" :: Nil) -> true, "Utils", Hidden)),
-      Menu.i("Home") / "index"
-        >> User.AddUserMenusAfter)
+      Menu.i("Home") / "index",
+      utilMenu
+      , Menu(Loc("User Menus", ("user" :: Nil) -> false, "foo", User.AddUserMenusHere)))
 
     // set the sitemap.  Note if you don't want access control for
     // each page, just comment this line out.

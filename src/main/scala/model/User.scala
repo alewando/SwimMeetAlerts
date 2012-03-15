@@ -3,11 +3,19 @@ package model
 import webapp.lib.{MetaMegaProtoUser, MegaProtoUser}
 import xml.Elem
 import net.liftweb.mongodb.record.field.MongoListField
+import org.bson.types.ObjectId
+import net.liftweb.common.Full
 
 class User extends MegaProtoUser[User] {
   def meta = User
 
-  object watching extends MongoListField[User, Swimmer](this)
+  object watching extends MongoListField[User, ObjectId](this)
+  
+  def allWatchedSwimmers : List[Swimmer] = {
+    for (swimmerId <- watching.value;
+         swimmer <- Swimmer.find(swimmerId)
+     ) yield{swimmer}
+  }
 }
 
 object User extends User with MetaMegaProtoUser[User] {
