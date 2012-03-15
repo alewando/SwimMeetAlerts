@@ -15,10 +15,10 @@ object Scraper extends Actor {
     // Scrape events from meet page
     for (event <- events(meet)) {
       // Send each event as a message to the scraper
-      log.debug("Sending message for event: " + event.id)
+      log.trace("Sending message for event: {}", event.id)
       this ! event
     }
-    log.info("Done scraping meet: {}", meet.name)
+    log.debug("Done scraping event list for meet: {}", meet.name)
   }
 
   /**
@@ -35,7 +35,6 @@ object Scraper extends Actor {
   }
 
   def act() {
-    log.debug("Scraper.act")
     loop {
       react {
         case event: Event => actor {
@@ -49,7 +48,7 @@ object Scraper extends Actor {
    * Scrape results from a specific event
    */
   def scrapeEvent(event: Event) {
-    log.debug("Scraping event " + event.id)
+    log.debug("Scraping event {} for meet {}", event.id, event.meet.name)
     try {
       val page = Source.fromURL(event.url)
       // Parse results
@@ -63,8 +62,8 @@ object Scraper extends Actor {
           log.trace("Line: {}", line)
       }
     } catch {
-      case e: Exception => log.error("Error scraping event " + event.id + ": " + e)
+      case e: Exception => log.error("Error scraping event {}: {}", event.id, e)
     }
-    log.debug("Done scraping event {}", event.id)
+    log.trace("Done scraping event {}", event.id)
   }
 }

@@ -9,7 +9,6 @@ import java.util.Properties
 import javax.mail._
 import net.liftweb.mongodb.BsonDSL._
 import model.{User, Result, Swimmer}
-import org.bson.types.ObjectId
 
 //TODO: Make Driver an actor
 object Driver {
@@ -56,7 +55,7 @@ object ResultProcessor extends Actor {
     }
     log.debug("Result for tracked swimmer: " + scrapedResult)
 
-    // TODO: Look for existing scrapedResult in DB
+    // Look for existing scrapedResult in DB
     val existing = Result.find(("swimmer" -> swimmer.id.is) ~ ("event" -> scrapedResult.event.name) ~ ("meet" -> scrapedResult.event.meet.name))
     existing openOr {
       // Create and save new scrapedResult record
@@ -73,14 +72,11 @@ object ResultProcessor extends Actor {
   }
 
   def getEmailRecipientsForSwimmer(swimmer: Swimmer): List[String] = {
-    // TODO: Look up email recipients (swimmer -> watchers -*> email)
-//    val emails = for {watcherId: ObjectId <- swimmer.watchers.value}
-//    yield User.find(watcherId) map {
-//      _.email.is
-//    }
-//    log.info("Emails for swimmer {}: {}", swimmer.name.value.fullName, emails)
-//    emails
-      Nil
+    for (watcher <- swimmer.watchers.value;
+         u <- User.find(watcher)
+    ) yield {
+      u.email.value
+    }
   }
 }
 
@@ -110,7 +106,7 @@ object EmailSender extends Actor {
   }
 
   def sendEmail(result: Result, recipientAddresses: List[String]) {
-    log.info("Sending email to " + recipientAddresses.length + " recipients")
+    log.info("Sending email to {} for result {}", recipientAddresses, result)
     // Set up the mail object
     val message = new MimeMessage(session)
 

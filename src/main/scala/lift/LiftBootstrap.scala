@@ -8,11 +8,10 @@ import mongodb.{DefaultMongoIdentifier, MongoDB}
 import sitemap._
 import org.slf4j.LoggerFactory
 import webapp.snippet.Scrape
-import com.mongodb.Mongo
-import scraper.{ResultProcessor, EmailSender, Scraper, Scheduler}
 import net.liftweb.sitemap.Loc._
 import model.{Swimmer, User}
-import org.bson.types.ObjectId
+import com.mongodb.Mongo
+import scraper.{Scheduler, ResultProcessor, EmailSender, Scraper}
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -77,20 +76,8 @@ class LiftBootstrap extends Bootable {
     EmailSender.start()
     Scraper.start()
 
-    log.info("Getting swimmers and emails")
-    Swimmer.findAll map { s =>
-      log.info("Swimmer: {}",s)
-      val emails = for (watcherId <- s.watchers.value) yield {
-        log.info("watcher: {}",watcherId)
-        User.find(watcherId) map { user => user.email }
-      }
-      log.info("Emails: {}", emails)
-    }
-
     // Start the scheduler
     Scheduler.scheduleJobs
-
-
   }
 
 

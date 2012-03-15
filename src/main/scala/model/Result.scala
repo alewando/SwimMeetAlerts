@@ -13,7 +13,6 @@ class Result  private() extends MongoRecord[Result] with ObjectIdPk[Result] {
   object age extends IntField(this)
   object team extends StringField(this,100)
   object place extends StringField(this, 10)
-  // TODO: Use some Joda fields here
   object seedTime extends StringField(this, 50)
   object finalTime extends StringField(this, 50)
 }
