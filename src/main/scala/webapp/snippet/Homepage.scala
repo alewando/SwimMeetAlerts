@@ -11,7 +11,7 @@ import net.liftweb.util.Helpers._
 class Homepage {
   def listSwimmers(xhtml: NodeSeq): NodeSeq = User.currentUser match {
     case Full(user) => {
-      user.allWatchedSwimmers match {
+      val swimmers = user.allWatchedSwimmers match {
         case Nil => Text("Not following any swimmers, add one below")
         case swimmers => swimmers.flatMap {
           swimmer =>
@@ -20,9 +20,13 @@ class Homepage {
             )
         }
       }
-
+      bind("swimmer", xhtml, "entry" -> swimmers)
     }
-    case _ => <lift:embed what="addSwimmer"/>
+    case _ => <div>
+      <a href={User.loginPageURL}>Login</a>
+      or
+      <a href={User.signUpPath.mkString("/", "/", "")}>sign up</a>
+    </div>
 
   }
 }
