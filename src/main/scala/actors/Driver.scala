@@ -1,49 +1,64 @@
-package scraper
+package actors
 
-import config.Config._
+import webapp.Config._
 import javax.mail.internet.{InternetAddress, MimeMessage}
-import scala.actors.Actor._
-import scala.actors.Actor
 import org.slf4j.LoggerFactory
 import java.util.Properties
 import javax.mail._
 import net.liftweb.mongodb.BsonDSL._
 import model.{User, Result, Swimmer}
+import akka.actor.{Props, Actor}
+import akka.routing.RoundRobinRouter
 
 //TODO: Make Driver an actor
-object Driver {
+class Driver extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
   val MAX_WAIT = 60000
 
+  val EventLink = """^<a href="(.+).htm" target=main>([^<]*)</a>.*""".r;
 
-  def scrapeMeet(meetId: String) {
-    try {
-      //val meet = new Meet("http://www.alewando.com/~adam/test_meet", "nkc") \
-      //val meet = new Meet("http://swimmakos.com", "realtime")
-      val meet = new Meet(BASE_URL, meetId)
-      log.info("Scraping " + meet.name + ": " + meet.url)
-      Scraper.scrapeMeet(meet)
+  val eventScraper = context.actorOf(Props[EventScraper].withRouter(RoundRobinRouter(15)), name = "eventScraper")
 
-    } catch {
-      case e: Exception => log.error("Error", e);
+  def receive = {
+    case meet: Meet => scrapeMeet(meet)
+  }
+
+  // TODO: Create a MeetScraper actor to do this
+  def scrapeMeet(meet: Meet) = {
+    // Scrape events from meet page
+    for (event <- events(meet)) {
+      // Send each event as a message to the actors
+      log.trace("Sending message for event: {}", event.id)
+      eventScraper ! event
     }
+    log.debug("Done scraping event list for meet: {}", meet.name)
+  }
+
+  /**
+   * Scrape events for a specific meet
+   */
+  def events(meet: Meet): List[Event] = {
+    var lEvents = List[Event]()
+    for (line <- meet.eventsPage.getLines(); m <- EventLink findAllIn line) m match {
+      case EventLink(id, name) =>
+        val eventUrl = meet.url + "/" + id + ".htm"
+        lEvents = new Event(id, meet, name.trim, eventUrl) :: lEvents
+    }
+    lEvents.reverse
   }
 }
 
 /**
  * Processes a scraped scrapedResult record. Saves new results to DB and sends an email.
  */
-object ResultProcessor extends Actor {
+class ResultProcessor extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
 
-  def act() {
-    loop {
-      react {
-        case result: ScrapedResult => actor {
-          handleResult(result)
-        }
-      }
-    }
+  val emailSender = context.actorFor("../emailSender")
+
+  def receive = {
+    case result: ScrapedResult =>
+      handleResult(result)
   }
 
   def handleResult(scrapedResult: ScrapedResult) {
@@ -67,7 +82,7 @@ object ResultProcessor extends Actor {
         case Nil => return
         case x: List[String] => x
       }
-      EmailSender !(result, emailRecips)
+      emailSender !(result, emailRecips)
     }
   }
 
@@ -80,7 +95,7 @@ object ResultProcessor extends Actor {
   }
 }
 
-object EmailSender extends Actor {
+class EmailSender extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
 
   val props = new Properties();
@@ -90,19 +105,14 @@ object EmailSender extends Actor {
   }
   val session = Session.getInstance(props, null);
 
-  def act() {
-    loop {
-      react {
-        case (result: Result, recipients: List[String]) =>
-          try {
-            // TODO: Iterate over recipients, send separate email (or use BCC?)
-            sendEmail(result, recipients)
-          } catch {
-            case e => log.error("Error sending email", e)
-          }
-        case _ => log.error("Unknown message")
+  def receive = {
+    case (result: Result, recipients: List[String]) =>
+      try {
+        sendEmail(result, recipients)
+      } catch {
+        // TODO: Let actor's parent handle the error
+        case e => log.error("Error sending email", e)
       }
-    }
   }
 
   def sendEmail(result: Result, recipientAddresses: List[String]) {
@@ -115,6 +125,7 @@ object EmailSender extends Actor {
 
     val recipients: Array[Address] = recipientAddresses.map(new InternetAddress(_)).toArray
 
+    // TODO: Send separate email (or use BCC?)
     message.setRecipients(Message.RecipientType.TO, recipients)
     val swimmer = result.swimmer.obj.openTheBox
     message.setSubject("New scrapedResult for " + swimmer + ": " + result.event.name)

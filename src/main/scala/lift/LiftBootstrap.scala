@@ -1,6 +1,6 @@
 package lift
 
-import config.Config
+import webapp.Config._
 import net.liftweb._
 import common._
 import http._
@@ -11,7 +11,9 @@ import webapp.snippet.Scrape
 import net.liftweb.sitemap.Loc._
 import model.User
 import com.mongodb.Mongo
-import scraper.{Scheduler, ResultProcessor, EmailSender, Scraper}
+import akka.actor.{Props, ActorSystem}
+import actors.{EmailSender, ResultProcessor, Scheduler, EventScraper}
+import webapp.Config
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -75,15 +77,9 @@ class LiftBootstrap extends Bootable {
     // Configure the database
     initDb
 
-    // Start actors
-    ResultProcessor.start()
-    EmailSender.start()
-    Scraper.start()
-
     // Start the scheduler
     Scheduler.scheduleJobs
   }
-
 
   def initDb {
     val url = Config.DATABASE_URL

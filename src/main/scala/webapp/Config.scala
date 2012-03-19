@@ -1,7 +1,8 @@
+package webapp
+
 /**
  * App configuration
  */
-package config
 object Config {
   val DEFAULT_DB_URL = "mongodb://kobe:27017/meetResults"
   val BASE_URL = Option(System.getenv().get("BASE_URL")) getOrElse "http://results.teamunify.com"

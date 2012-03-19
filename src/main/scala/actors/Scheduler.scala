@@ -1,11 +1,12 @@
-package scraper
+package actors
 
-import config.Config
 import org.quartz.impl.StdSchedulerFactory
 import org.quartz._
 import org.slf4j.LoggerFactory
+import webapp.{WebApp, Config}
 
 object Scheduler {
+  val driver = WebApp.driver
   val scheduler = StdSchedulerFactory.getDefaultScheduler();
   scheduler.start();
 
@@ -31,7 +32,7 @@ class ScraperJob extends Job {
   val log = LoggerFactory.getLogger(this.getClass)
 
   override def execute(ctx: JobExecutionContext) {
-    log.debug("Running scraper job")
-    Driver.scrapeMeet(Config.DEFAULT_MEET_ID)
+    log.debug("Running actors job")
+    WebApp.driver ! Meet(Config.BASE_URL, Config.DEFAULT_MEET_ID)
   }
 }

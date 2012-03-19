@@ -7,6 +7,7 @@ import org.bson.types.ObjectId
 import net.liftweb.mongodb.record.field.{BsonRecordField, MongoListField, ObjectIdPk}
 import net.liftweb.record.field.{OptionalStringField, StringField}
 import net.liftweb.common.{Box, Empty, Full}
+import actors.ScrapedResult
 
 class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   def meta = Swimmer
@@ -51,7 +52,7 @@ object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
     }  
   }
 
-  def findForResult(result: scraper.ScrapedResult) : Box[Swimmer] = {
+  def findForResult(result: ScrapedResult) : Box[Swimmer] = {
     findForName(result.entrant.fullName)
   }
 }
