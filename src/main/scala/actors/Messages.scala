@@ -35,8 +35,14 @@ case class Person(firstName: String, lastName: String) {
   }
 }
 
+/**
+ * Passed to indicate an event page has been scraped. The completed flag indicates
+ * that the event is completed (entrants have final times)
+ */
+case class EventScraped(event: Event, completed: Boolean)
+
 case class ScrapedResult(event: Event, entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String) {
-  def mapToRecord() : Result = {
+  def mapToRecord(): Result = {
     Result.createRecord.meet(event.meet.name).event(event.name).age(age).team(team).seedTime(seedTime).finalTime(finalTime)
   }
 }

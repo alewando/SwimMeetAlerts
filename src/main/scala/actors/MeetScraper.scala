@@ -14,6 +14,7 @@ class MeetScraper extends Actor {
 
   def receive = {
     case meet: Meet => scrapeMeet(meet)
+    case EventScraped(event, completed) => log.info("Event {} scraped. Completed: {}", event.name, completed)
   }
 
   def scrapeMeet(meet: Meet) = {
