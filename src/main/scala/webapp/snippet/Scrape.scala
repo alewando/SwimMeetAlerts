@@ -31,7 +31,7 @@ class Scrape {
 
 }
 
-object Scrape extends RestHelper {
+object ScrapeRestHandler extends RestHelper {
   val log = LoggerFactory.getLogger(this.getClass())
 
   // REST handler

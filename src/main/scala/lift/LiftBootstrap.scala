@@ -1,19 +1,16 @@
 package lift
 
-import webapp.Config._
 import net.liftweb._
 import common._
 import http._
 import mongodb.{DefaultMongoIdentifier, MongoDB}
 import sitemap._
 import org.slf4j.LoggerFactory
-import webapp.snippet.Scrape
 import net.liftweb.sitemap.Loc._
 import model.User
 import com.mongodb.Mongo
-import akka.actor.{Props, ActorSystem}
-import actors.{EmailSender, ResultProcessor, Scheduler, EventScraper}
 import webapp.Config
+import webapp.snippet.ScrapeRestHandler
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -29,8 +26,10 @@ class LiftBootstrap extends Bootable {
     LiftRules.addToPackages("webapp")
 
     val isAdmin = If(() => User.superUser_?, () => RedirectResponse("/"))
+    // TODO: Put something at /util so that the menu link is useful
     val utilMenu = Menu(Loc("Utils", ("util" :: Nil) -> true, "Utils", isAdmin),
-      Menu(Loc("swimmers", ("util"::"swimmers"::Nil)->false, "List Swimmers")))
+      Menu(Loc("swimmers", ("util" :: "swimmers" :: Nil) -> false, "List Swimmers", isAdmin)),
+      Menu(Loc("scrape", ("util" :: "scrape" :: Nil) -> false, "Scrape Meet", isAdmin)))
 
     def sitemap(): SiteMap = SiteMap(
       Menu.i("Home") / "index",
@@ -72,13 +71,10 @@ class LiftBootstrap extends Bootable {
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
 
     // Add REST dispatches
-    LiftRules.statelessDispatchTable.append(Scrape)
+    LiftRules.statelessDispatchTable.append(ScrapeRestHandler)
 
     // Configure the database
     initDb
-
-    // Start the scheduler
-    Scheduler.scheduleJobs
   }
 
   def initDb {

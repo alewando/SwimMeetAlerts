@@ -11,7 +11,7 @@ import akka.actor.Actor
 class ResultProcessor extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val emailSender = context.actorFor("../emailSender")
+  val emailSender = context.actorFor("/user/emailSender")
 
   def receive = {
     case result: ScrapedResult =>

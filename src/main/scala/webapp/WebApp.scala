@@ -13,10 +13,19 @@ object WebApp extends App {
 
   val log = LoggerFactory.getLogger(this.getClass())
 
-  log.info("akka conf: {}",this.getClass.getResource("/application.conf"))
+  // Start the actor system
   val actors: ActorSystem = initActors
   val driver = actors.actorFor("/user/driver")
-  startJetty
+
+  // Start Jetty container
+  val jettyServer = startJetty
+
+  // Start the scheduler
+  log.info("Starting scheduler")
+  Scheduler.scheduleJobs
+
+  // Join the Jetty server thread
+  jettyServer.join()
 
   def initActors = {
     val system = ActorSystem("AlertsSystem")
@@ -26,7 +35,7 @@ object WebApp extends App {
     system
   }
 
-  def startJetty = {
+  def startJetty : Server = {
 
     val port = if (System.getenv("PORT") != null) System.getenv("PORT").toInt else 5000
     val server = new Server
@@ -45,8 +54,8 @@ object WebApp extends App {
     handlers.setHandlers(Array(webApp, sampleMeetsHandler))
     server.setHandler(handlers)
 
-    server.start
-    server.join
+    server.start()
+    server
   }
 
 }
