@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import net.liftweb.mongodb.BsonDSL._
 import org.bson.types.ObjectId
 import net.liftweb.mongodb.record.field.{BsonRecordField, MongoListField, ObjectIdPk}
-import net.liftweb.record.field.{OptionalStringField, StringField}
+import net.liftweb.record.field.StringField
 import net.liftweb.common.{Box, Empty, Full}
 import actors.ScrapedResult
 
@@ -18,6 +18,8 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
 
   object watchers extends MongoListField[Swimmer, ObjectId](this)
 
+  // TODO: Add results as a list field on Swimmer
+
   def addWatcher(user: User) {
     Swimmer.update(("_id" -> this.id.is), ("$addToSet" ->("watchers", user.id.asInstanceOf[ObjectId])))
     val upd = ("$addToSet" ->("watching", this.id.is.asInstanceOf[ObjectId]))
@@ -29,12 +31,12 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
 
 object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
   val NamePattern = """(\w+) (\w){1} (\w+)""".r
-  
-  def createForName(firstName: String, lastName: String) : Swimmer = {
+
+  def createForName(firstName: String, lastName: String): Swimmer = {
     createRecord.name(Name.createRecord.firstName(firstName).lastName(lastName)).save
   }
-  
-  def findForName(fullName : String) : Box[Swimmer] = {
+
+  def findForName(fullName: String): Box[Swimmer] = {
     // Search by upper-cased name
     val searchName = fullName.toUpperCase
     //log.debug("Searching for {}",searchName)
@@ -49,10 +51,10 @@ object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
           case _ => Empty
         }
       }
-    }  
+    }
   }
 
-  def findForResult(result: ScrapedResult) : Box[Swimmer] = {
+  def findForResult(result: ScrapedResult): Box[Swimmer] = {
     findForName(result.entrant.fullName)
   }
 }
