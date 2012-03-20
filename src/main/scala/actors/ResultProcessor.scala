@@ -6,7 +6,7 @@ import model.{User, Result, Swimmer}
 import akka.actor.Actor
 
 /**
- * Processes a scraped scrapedResult record. Saves new results to DB and sends an email.
+ * Processes a scraped record. Saves new results to DB and sends an email.
  */
 class ResultProcessor extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
