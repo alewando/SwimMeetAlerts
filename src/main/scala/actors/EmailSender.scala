@@ -5,8 +5,8 @@ import javax.mail.internet.{InternetAddress, MimeMessage}
 import org.slf4j.LoggerFactory
 import java.util.Properties
 import javax.mail._
-import model.Result
 import akka.actor.Actor
+import model.{Swimmer, Result}
 
 
 class EmailSender extends Actor {
@@ -20,16 +20,16 @@ class EmailSender extends Actor {
   val session = Session.getInstance(props, null);
 
   def receive = {
-    case (result: Result, recipients: List[String]) =>
+    case (swimmer: Swimmer, result: Result, recipients: List[String]) =>
       try {
-        sendEmail(result, recipients)
+        sendEmail(swimmer, result, recipients)
       } catch {
         // TODO: Let actor's parent handle the error
         case e => log.error("Error sending email", e)
       }
   }
 
-  def sendEmail(result: Result, recipientAddresses: List[String]) {
+  def sendEmail(swimmer: Swimmer, result: Result, recipientAddresses: List[String]) {
     log.info("Sending email to {} for result {}", recipientAddresses, result)
     // Set up the mail object
     val message = new MimeMessage(session)
@@ -41,8 +41,7 @@ class EmailSender extends Actor {
 
     // TODO: Send separate email (or use BCC?)
     message.setRecipients(Message.RecipientType.TO, recipients)
-    val swimmer = result.swimmer.obj.openTheBox
-    message.setSubject("New scrapedResult for " + swimmer + ": " + result.event.name)
+    message.setSubject("New scrapedResult for " + swimmer.name.value.fullName + ": " + result.event.name)
     val body = swimmer.name.value.fullName + "\n" +
       result.meet.is + "\n" +
       result.event.is + "\n" +

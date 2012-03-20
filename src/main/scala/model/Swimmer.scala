@@ -4,10 +4,10 @@ import net.liftweb.mongodb.record.{BsonMetaRecord, BsonRecord, MongoMetaRecord, 
 import org.slf4j.LoggerFactory
 import net.liftweb.mongodb.BsonDSL._
 import org.bson.types.ObjectId
-import net.liftweb.mongodb.record.field.{BsonRecordField, MongoListField, ObjectIdPk}
 import net.liftweb.record.field.StringField
 import net.liftweb.common.{Box, Empty, Full}
 import actors.ScrapedResult
+import net.liftweb.mongodb.record.field.{BsonRecordListField, BsonRecordField, MongoListField, ObjectIdPk}
 
 class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   def meta = Swimmer
@@ -18,13 +18,17 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
 
   object watchers extends MongoListField[Swimmer, ObjectId](this)
 
-  // TODO: Add results as a list field on Swimmer
+  object results extends BsonRecordListField(this, Result)
 
   def addWatcher(user: User) {
     Swimmer.update(("_id" -> this.id.is), ("$addToSet" ->("watchers", user.id.asInstanceOf[ObjectId])))
     val upd = ("$addToSet" ->("watching", this.id.is.asInstanceOf[ObjectId]))
     User.update(("_id" -> user.id), upd)
     log.info("User {} now watching swimmer: {}", user.shortName, this)
+  }
+
+  def addResult(result: Result) {
+    Swimmer.update(("_id" -> this.id.is), ("$addToSet" ->("results", result.asJValue)))
   }
 
 }

@@ -32,14 +32,15 @@ class ResultProcessor extends Actor {
     existing openOr {
       // Create and save new scrapedResult record
       log.info("Saving new scrapedResult for tracked swimmer: {}", scrapedResult)
-      val result = model.Result.createRecord.swimmer(swimmer.id.is).meet(scrapedResult.event.meet.name).event(scrapedResult.event.name).age(scrapedResult.age).team(scrapedResult.team).seedTime(scrapedResult.seedTime).finalTime(scrapedResult.finalTime).save
+      val result = model.Result.createRecord.meet(scrapedResult.event.meet.name).event(scrapedResult.event.name).age(scrapedResult.age).team(scrapedResult.team).seedTime(scrapedResult.seedTime).finalTime(scrapedResult.finalTime)
+      swimmer.addResult(result)
 
       // Get emails for swimmer's watchers
       val emailRecips = getEmailRecipientsForSwimmer(swimmer) match {
         case Nil => return
         case x: List[String] => x
       }
-      emailSender !(result, emailRecips)
+      emailSender !(swimmer, result, emailRecips)
     }
   }
 
