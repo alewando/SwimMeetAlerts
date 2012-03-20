@@ -1,15 +1,14 @@
 package actors
 
 import org.slf4j.LoggerFactory
-import net.liftweb.mongodb.BsonDSL._
-import model.{User, Result, Swimmer}
+import model.{User, Swimmer}
 import akka.actor.Actor
 
 /**
  * Processes a scraped record. Saves new results to DB and sends an email.
  */
 class ResultProcessor extends Actor {
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log = LoggerFactory.getLogger(getClass)
 
   val emailSender = context.actorFor("/user/emailSender")
 
@@ -28,17 +27,19 @@ class ResultProcessor extends Actor {
     log.debug("Result for tracked swimmer: " + scrapedResult)
 
     // Look for existing scrapedResult in DB
-    val existing = Result.find(("swimmer" -> swimmer.id.is) ~ ("event" -> scrapedResult.event.name) ~ ("meet" -> scrapedResult.event.meet.name))
-    existing openOr {
+    if (!swimmer.resultExists_?(scrapedResult)) {
       // Create and save new scrapedResult record
       log.info("Saving new scrapedResult for tracked swimmer: {}", scrapedResult)
-      val result = model.Result.createRecord.meet(scrapedResult.event.meet.name).event(scrapedResult.event.name).age(scrapedResult.age).team(scrapedResult.team).seedTime(scrapedResult.seedTime).finalTime(scrapedResult.finalTime)
+      val result = scrapedResult.mapToRecord()
       swimmer.addResult(result)
 
       // Get emails for swimmer's watchers
-      val emailRecips = getEmailRecipientsForSwimmer(swimmer) match {
-        case Nil => return
-        case x: List[String] => x
+      val emailRecips : List[String]= getEmailRecipientsForSwimmer(swimmer) match {
+        case Nil => {
+          log.info("Swimmer {} is being tracked, but has no follower email addresses", swimmer.name.value.fullName)
+          return
+        }
+        case x => x
       }
       emailSender !(swimmer, result, emailRecips)
     }

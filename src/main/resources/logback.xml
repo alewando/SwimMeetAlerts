@@ -9,7 +9,8 @@
   <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
-  
+  <logger name="org.eclipse.jetty" level="INFO"/>
+
   <logger name="net.liftweb" level="INFO"/>
   <logger name="actors" level="DEBUG"/>
   <logger name="model" level="DEBUG"/>

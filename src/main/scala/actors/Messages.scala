@@ -1,6 +1,7 @@
 package actors
 
 import io.Source
+import model.Result
 
 case class Meet(baseUrl: String, teamId: String) {
   def url: String = {
@@ -34,4 +35,8 @@ case class Person(firstName: String, lastName: String) {
   }
 }
 
-case class ScrapedResult(event: Event, entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String)
+case class ScrapedResult(event: Event, entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String) {
+  def mapToRecord() : Result = {
+    Result.createRecord.meet(event.meet.name).event(event.name).age(age).team(team).seedTime(seedTime).finalTime(finalTime)
+  }
+}

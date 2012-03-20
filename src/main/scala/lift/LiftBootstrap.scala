@@ -27,7 +27,7 @@ class LiftBootstrap extends Bootable {
 
     val isAdmin = If(() => User.superUser_?, () => RedirectResponse("/"))
     // TODO: Put something at /util so that the menu link is useful
-    val utilMenu = Menu(Loc("Utils", ("util" :: Nil) -> true, "Utils", isAdmin),
+    val utilMenu = Menu(Loc("Utils", ("util" :: Nil) -> false, "Utils", isAdmin),
       Menu(Loc("swimmers", ("util" :: "swimmers" :: Nil) -> false, "List Swimmers", isAdmin)),
       Menu(Loc("scrape", ("util" :: "scrape" :: Nil) -> false, "Scrape Meet", isAdmin)))
 

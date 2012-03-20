@@ -28,7 +28,14 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   }
 
   def addResult(result: Result) {
-    Swimmer.update(("_id" -> this.id.is), ("$addToSet" ->("results", result.asJValue)))
+    Swimmer.update(("_id" -> this.id.is), ("$push" ->("results", result.asJValue)))
+  }
+
+  def resultExists_?(candidate: ScrapedResult): Boolean = {
+    // { "results" : {"$elemMatch" : {"meet":"2011 Mason Fall Invitational", "event":"#105 Girls 500 Freexx"}}}
+    Swimmer.find(
+      ("results" -> ("$elemMatch" -> ("meet" -> candidate.event.meet.name) ~ ("event" -> candidate.event.name)))
+    ).isDefined
   }
 
 }
@@ -61,6 +68,7 @@ object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
   def findForResult(result: ScrapedResult): Box[Swimmer] = {
     findForName(result.entrant.fullName)
   }
+
 }
 
 class Name extends BsonRecord[Name] {
