@@ -3,7 +3,9 @@ package actors
 import org.slf4j.LoggerFactory
 import akka.routing.RoundRobinRouter
 import akka.actor.{Props, Actor}
-
+import akka.pattern._
+import akka.util.duration._
+import akka.dispatch.{Await, Future}
 
 class MeetScraper extends Actor {
 
@@ -19,12 +21,17 @@ class MeetScraper extends Actor {
 
   def scrapeMeet(meet: Meet) = {
     // Scrape events from meet page
-    for (event <- events(meet)) {
+    val eventScrapes = for (event <- events(meet)) yield {
       // Send each event as a message to the actors
       log.trace("Sending message for event: {}", event.id)
-      eventScraper ! event
+      eventScraper.ask(event)(20 seconds).mapTo[EventScraped]
     }
-    log.debug("Done scraping event list for meet: {}", meet.name)
+    // Get overall meet status (completed) by folding up status of individual events. Any non-completed event
+    // will cause the entire meet to be considered incomplete
+    import context.dispatcher
+    val meetCompletedFuture = Future.fold(eventScrapes)(true)((agg: Boolean, evt: EventScraped) => agg && evt.completed)
+    val meetCompleted = Await.result(meetCompletedFuture, 5 minutes);
+    log.debug("Meet {} completed: {}", meet.name, meetCompleted)
   }
 
   /**
