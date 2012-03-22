@@ -7,7 +7,7 @@ import Helpers._
 import org.slf4j.LoggerFactory
 import net.liftweb.http._
 import net.liftweb.http.rest.RestHelper
-import actors.Meet
+import actors.ScrapeMeet
 
 
 class Scrape {
@@ -21,7 +21,7 @@ class Scrape {
 
     def doScrape() {
       log.info("I should be scraping " + meetId + " now");
-      driver ! Meet(Config.BASE_URL, meetId)
+      driver ! ScrapeMeet(Config.BASE_URL + "/" + meetId)
     }
 
     bind("meet", xhtml,
@@ -38,7 +38,7 @@ object ScrapeRestHandler extends RestHelper {
   serve {
     case "scrape" :: id :: _ XmlGet _ => {
       log.info("REST: scrape " + id)
-      WebApp.driver ! Meet(Config.BASE_URL, id)
+      WebApp.driver ! ScrapeMeet(Config.BASE_URL + "/" + id)
       <result></result>
     }
   }

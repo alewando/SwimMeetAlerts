@@ -22,8 +22,8 @@ class EventScraper extends Actor {
    * Scrape results from a specific event
    */
   def scrapeEvent(event: Event) {
-    log.debug("Scraping event {} for meet {}", event.id, event.meet.name)
-    var completedCount =0;
+    log.debug("Scraping event {} for meet {}", event.id, event.meetName)
+    var completedCount = 0;
     var incompleteCount = 0;
     try {
       val page = Source.fromURL(event.url)
@@ -38,10 +38,10 @@ class EventScraper extends Actor {
           // We don't do anything with relay results but need to find the completed
           // results so that the event can be marked as complete
           completedCount += 1
-        case ResultWithoutFinalTime(place, lastName, firstName, age, team, seed)  =>
+        case ResultWithoutFinalTime(place, lastName, firstName, age, team, seed) =>
           // Note this pattern also matches any 'Preliminary' results included on the Finals event page
           incompleteCount += 1
-        case line => log.trace("Unmatched line: {}",line)
+        case line => log.trace("Unmatched line: {}", line)
       }
     } catch {
       case e: Exception => log.error("Error scraping event {}: {}", event.id, e)

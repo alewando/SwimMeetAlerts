@@ -1,14 +1,11 @@
 package actors
 
-import io.Source
 import model.Result
+import io.{BufferedSource, Source}
 
-case class Meet(baseUrl: String, teamId: String) {
-  def url: String = {
-    baseUrl + "/" + teamId;
-  }
+case class ScrapeMeet(url: String) {
 
-  def eventsPage = {
+  def eventsPage: BufferedSource = {
     val eventsUrl = url + "/evtindex.htm"
 
     Source.fromURL(eventsUrl)
@@ -27,7 +24,7 @@ case class Meet(baseUrl: String, teamId: String) {
   }
 }
 
-case class Event(id: String, meet: Meet, name: String, url: String)
+case class Event(id: String, meetName: String, name: String, url: String)
 
 case class Person(firstName: String, lastName: String) {
   def fullName: String = {
@@ -43,6 +40,6 @@ case class EventScraped(event: Event, completed: Boolean)
 
 case class ScrapedResult(event: Event, entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String) {
   def mapToRecord(): Result = {
-    Result.createRecord.meet(event.meet.name).event(event.name).age(age).team(team).seedTime(seedTime).finalTime(finalTime)
+    Result.createRecord.meet(event.meetName).event(event.name).age(age).team(team).seedTime(seedTime).finalTime(finalTime)
   }
 }

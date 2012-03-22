@@ -11,7 +11,7 @@ class Driver extends Actor {
   val meetScraper = context.actorOf(Props[MeetScraper].withRouter(RoundRobinRouter(5)), name = "eventScraper")
 
   def receive = {
-    case meet: Meet => meetScraper forward meet
+    case meetReq: ScrapeMeet => meetScraper forward meetReq
   }
 
 }

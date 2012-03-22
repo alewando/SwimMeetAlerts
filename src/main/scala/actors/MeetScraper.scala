@@ -15,11 +15,11 @@ class MeetScraper extends Actor {
   val EventLink = """^<a href="(.+).htm" target=main>([^<]*)</a>.*""".r;
 
   def receive = {
-    case meet: Meet => scrapeMeet(meet)
+    case meet: ScrapeMeet => scrapeMeet(meet)
     case EventScraped(event, completed) => log.info("Event {} scraped. Completed: {}", event.name, completed)
   }
 
-  def scrapeMeet(meet: Meet) = {
+  def scrapeMeet(meet: ScrapeMeet) = {
     // Scrape events from meet page
     val eventScrapes = for (event <- events(meet)) yield {
       // Send each event as a message to the actors
@@ -37,12 +37,12 @@ class MeetScraper extends Actor {
   /**
    * Scrape events for a specific meet
    */
-  def events(meet: Meet): List[Event] = {
+  def events(meet: ScrapeMeet): List[Event] = {
     var lEvents = List[Event]()
     for (line <- meet.eventsPage.getLines(); m <- EventLink findAllIn line) m match {
       case EventLink(id, name) =>
         val eventUrl = meet.url + "/" + id + ".htm"
-        lEvents = new Event(id, meet, name.trim, eventUrl) :: lEvents
+        lEvents = new Event(id, meet.name, name.trim, eventUrl) :: lEvents
     }
     lEvents.reverse
   }

@@ -34,7 +34,7 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   def resultExists_?(candidate: ScrapedResult): Boolean = {
     // { "results" : {"$elemMatch" : {"meet":"2011 Mason Fall Invitational", "event":"#105 Girls 500 Freexx"}}}
     Swimmer.find(
-      ("results" -> ("$elemMatch" -> ("meet" -> candidate.event.meet.name) ~ ("event" -> candidate.event.name)))
+      ("results" -> ("$elemMatch" -> ("meet" -> candidate.event.meetName) ~ ("event" -> candidate.event.name)))
     ).isDefined
   }
 
