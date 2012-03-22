@@ -12,6 +12,8 @@ resolvers += "Scala Tools Snapshots" at "http://scala-tools.org/repo-snapshots"
 
 resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases"
 
+resolvers += "Spray http lib Repo" at "http://repo.spray.cc/"
+
 //resolvers += "repo.novus rels" at "http://repo.novus.com/snapshots/"
 
 libraryDependencies ++= {
@@ -27,6 +29,8 @@ libraryDependencies ++= {
 libraryDependencies ++= Seq(
     "com.typesafe.akka" % "akka-actor" % "2.0",
     "com.typesafe.akka" % "akka-slf4j" % "2.0",
+    "cc.spray" % "spray-client" % "0.8.0",
+    "joda-time" % "joda-time" % "2.1",
     "javax.mail" % "mail" % "1.4.1",
     "org.quartz-scheduler" % "quartz" % "2.1.3",
     "org.mongodb" % "mongo-java-driver" % "2.7.3",
