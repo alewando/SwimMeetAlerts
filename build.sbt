@@ -29,8 +29,10 @@ libraryDependencies ++= {
 libraryDependencies ++= Seq(
     "com.typesafe.akka" % "akka-actor" % "2.0",
     "com.typesafe.akka" % "akka-slf4j" % "2.0",
-    "cc.spray" % "spray-client" % "0.8.0",
+    "cc.spray" % "spray-client" % "0.8.0" intransitive(),
+    "cc.spray" % "spray-base" % "0.8.0" intransitive(),
     "joda-time" % "joda-time" % "2.1",
+    "org.joda" % "joda-convert" % "1.2",
     "javax.mail" % "mail" % "1.4.1",
     "org.quartz-scheduler" % "quartz" % "2.1.3",
     "org.mongodb" % "mongo-java-driver" % "2.7.3",
