@@ -13,20 +13,12 @@ import org.slf4j.LoggerFactory
 class Homepage {
   val log = LoggerFactory.getLogger(this.getClass)
 
-  def listSwimmers(xhtml: NodeSeq): NodeSeq = User.currentUser match {
-    case Full(user) => {
-      val swimmers = user.allWatchedSwimmers match {
-        case Nil => Text("Not following any swimmers, add one below")
-        case swimmers => swimmers.flatMap {
-          swimmer =>
-            bind("swimmer", chooseTemplate("swimmer", "entry", xhtml),
-              "name" -> Text(swimmer.name.is.fullName)
-            )
-        }
+  def listSwimmers = User.currentUser match {
+    case Full(user) =>
+      "#swimmer *" #> user.allWatchedSwimmers.map {
+        s => "#name" #> s.name.is.fullName
       }
-      bind("swimmer", xhtml, "entry" -> swimmers)
-    }
-    case _ => <div>
+    case _ => "*" #> <div>
       <a href={User.loginPageURL}>Login</a>
       or
       <a href={User.signUpPath.mkString("/", "/", "")}>sign up</a>
