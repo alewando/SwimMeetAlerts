@@ -1,11 +1,8 @@
 <div id="main" class="lift:surround?with=default;at=content">
-    This is some stuff
-    <lift:Scrape.scrapeIt form="POST">
+    <div class="lift:Scrape.scrapeIt?form=POST">
         Meet ID:
-        <meet:meetId></meet:meetId>
-        <br/>
-        <meet:submit/>
-        that was submit
-    </lift:Scrape.scrapeIt>
+        <input type="text" id="meetId"/>
+        <input type="submit" id="submit"/>
+    </div>
 </div>
 

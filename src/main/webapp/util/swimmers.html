@@ -2,9 +2,7 @@
     <h2>Swimmers</h2>
 
     <div class="lift:Swimmers.listswimmers?form=POST">
-        Name:
-        <swimmer:name></swimmer:name>
-        <swimmer:submit></swimmer:submit>
+        Name: <span id="name">Name</span> <input type="submit" id="submit" value="Follow"/>
     </div>
 
 
@@ -12,13 +10,13 @@
 
     <div class="lift:Swimmers.addswimmer?form=POST">
         <div>First Name:
-            <swimmer:firstname>First</swimmer:firstname>
+            <input type="text" id="firstname">First</input>
         </div>
         <div>Last Name:
-            <swimmer:lastname>Last</swimmer:lastname>
+            <input type="text" id="lastname">Last</input>
         </div>
         <div>
-            <swimmer:submit>Add</swimmer:submit>
+            <input type="submit" id="submit" value="Add"/>
         </div>
     </div>
 </div>

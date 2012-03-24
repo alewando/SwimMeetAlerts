@@ -1,11 +1,10 @@
 package webapp.snippet
 
 import net.liftweb.common.Full
-import xml.{Text, NodeSeq}
-import net.liftweb.util.Helpers._
-import model.{Swimmer, User}
-import net.liftweb.http.{RequestVar, SHtml}
+import net.liftweb.util.BindHelpers._
 import org.slf4j.LoggerFactory
+import model.{Swimmer, User}
+import net.liftweb.http.{SHtml, RequestVar}
 
 /**
  * Snippet for the homepage
@@ -13,28 +12,32 @@ import org.slf4j.LoggerFactory
 class Homepage {
   val log = LoggerFactory.getLogger(this.getClass)
 
-  def listSwimmers(xhtml: NodeSeq): NodeSeq = User.currentUser match {
-    case Full(user) => {
-      val swimmers = user.allWatchedSwimmers match {
-        case Nil => Text("Not following any swimmers, add one below")
-        case swimmers => swimmers.flatMap {
-          swimmer =>
-            bind("swimmer", chooseTemplate("swimmer", "entry", xhtml),
-              "name" -> Text(swimmer.name.is.fullName)
-            )
+  def listSwimmers = {
+    User.currentUser match {
+      case Full(user) =>
+        "#entry" #> {
+          user.allWatchedSwimmers map {
+            s =>
+              def processRemove() = {
+                s.removeWatcher(user)
+              }
+
+              "#name" #> s.name.get.fullName & "#remove" #> SHtml.submit("Remove", processRemove)
+          }
         }
-      }
-      bind("swimmer", xhtml, "entry" -> swimmers)
+      case _ => "*" #> <div>
+        <a href={User.loginPageURL}>Login</a>
+        or
+        <a href={User.signUpPath.mkString("/", "/", "")}>sign up</a>
+      </div>
     }
-    case _ => <div>
-      <a href={User.loginPageURL}>Login</a>
-      or
-      <a href={User.signUpPath.mkString("/", "/", "")}>sign up</a>
-    </div>
   }
 
-  def addswimmer(xhtml: NodeSeq): NodeSeq = {
+
+  def addswimmer = {
+
     object firstName extends RequestVar("")
+
     object lastName extends RequestVar("")
 
     def processAddSwimmer() {
@@ -55,11 +58,10 @@ class Homepage {
 
     User.currentUser match {
       case Full(user) =>
-        bind("swimmer", xhtml,
-          "firstname" -> SHtml.text(firstName.is, firstName(_)),
-          "lastname" -> SHtml.text(lastName.is, lastName(_)),
-          "submit" -> SHtml.submit("Add", processAddSwimmer))
-      case _ => <div></div>
+        "#firstName" #> SHtml.text(firstName.is, firstName(_)) &
+          "#lastName" #> SHtml.text(lastName.is, lastName(_)) &
+          "#submit" #> SHtml.submit("Add", processAddSwimmer)
+      case _ => "*" #> ""
     }
   }
 }

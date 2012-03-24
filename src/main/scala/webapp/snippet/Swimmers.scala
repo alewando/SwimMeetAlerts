@@ -1,32 +1,27 @@
 package webapp.snippet
 
-import xml.NodeSeq
 import net.liftweb.util.Helpers._
 import org.slf4j.LoggerFactory
 import net.liftweb.http.{RequestVar, SHtml}
-import model.{Name, User, Swimmer}
+import model.{User, Swimmer}
 
 class Swimmers {
 
   val log = LoggerFactory.getLogger(getClass())
 
-  def listswimmers(xhtml: NodeSeq): NodeSeq = {
-    Swimmer.findAll.flatMap {
-      swimmer => bindSwimmer(swimmer, xhtml)
-    }
+  def listswimmers = {
+    val user = User.currentUser.openTheBox
+    "*" #>
+      Swimmer.findAll.map {
+        swimmer =>
+          def processWatch() {
+            swimmer.addWatcher(user)
+          }
+          "#name" #> swimmer.name.is.fullName & "#submit" #> SHtml.submit("Watch", processWatch)
+      }
   }
 
-  def bindSwimmer(swimmer: Swimmer, xhtml: NodeSeq): NodeSeq = {
-
-    def processWatch() {
-      val currentUser = User.currentUser.openTheBox
-      swimmer.addWatcher(currentUser)
-    }
-
-    bind("swimmer", xhtml, "name" -> swimmer.name.is.fullName, "submit" -> SHtml.submit("Watch", processWatch))
-  }
-
-  def addswimmer(xhtml: NodeSeq): NodeSeq = {
+  def addswimmer = {
     object firstName extends RequestVar("")
     object lastName extends RequestVar("")
 
@@ -35,10 +30,9 @@ class Swimmers {
       Swimmer.createForName(firstName.is, lastName.is)
     }
 
-    bind("swimmer", xhtml,
-      "firstname" -> SHtml.text(firstName.is, firstName(_)),
-      "lastname" -> SHtml.text(lastName.is, lastName(_)),
-      "submit" -> SHtml.submit("Add", processAdd))
+    "#firstname" #> SHtml.text(firstName.is, firstName(_)) &
+      "#lastname" #> SHtml.text(lastName.is, lastName(_)) &
+      "#submit" #> SHtml.submit("Add", processAdd)
   }
 
 }
