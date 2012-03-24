@@ -29,7 +29,8 @@ class LiftBootstrap extends Bootable {
     // TODO: Put something at /util so that the menu link is useful
     val utilMenu = Menu(Loc("Utils", ("util" :: Nil) -> false, "Utils", isAdmin),
       Menu(Loc("swimmers", ("util" :: "swimmers" :: Nil) -> false, "List Swimmers", isAdmin)),
-      Menu(Loc("scrape", ("util" :: "scrape" :: Nil) -> false, "Scrape Meet", isAdmin)))
+      Menu(Loc("scrape", ("util" :: "scrape" :: Nil) -> false, "Scrape Meet", isAdmin)),
+      Menu(Loc("urls", ("util" :: "urls" :: Nil) -> false, "Manage URLs", isAdmin)))
 
     def sitemap(): SiteMap = SiteMap(
       Menu.i("Home") / "index",

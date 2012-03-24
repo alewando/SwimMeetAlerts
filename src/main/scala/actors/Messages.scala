@@ -3,6 +3,8 @@ package actors
 import io.{BufferedSource, Source}
 import model.{MeetUrl, Result}
 
+case class ScrapeAllMeets()
+
 case class ScrapeMeet(url: MeetUrl) {
 
   def eventsPage: BufferedSource = {

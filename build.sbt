@@ -29,8 +29,9 @@ libraryDependencies ++= {
 libraryDependencies ++= Seq(
     "com.typesafe.akka" % "akka-actor" % "2.0",
     "com.typesafe.akka" % "akka-slf4j" % "2.0",
-    "cc.spray" % "spray-client" % "0.8.0" intransitive(),
-    "cc.spray" % "spray-base" % "0.8.0" intransitive(),
+    "cc.spray" % "spray-client" % "0.9.0" intransitive(),
+    "cc.spray" % "spray-base" % "0.9.0" intransitive(),
+    "cc.spray" % "spray-can" % "0.9.3" intransitive(),
     "joda-time" % "joda-time" % "2.1",
     "org.joda" % "joda-convert" % "1.2",
     "javax.mail" % "mail" % "1.4.1",
