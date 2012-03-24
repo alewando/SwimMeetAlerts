@@ -5,7 +5,8 @@ import akka.routing.RoundRobinRouter
 import akka.actor.{Props, Actor}
 import akka.pattern._
 import akka.util.duration._
-import akka.dispatch.{Await, Future}
+import akka.dispatch.Future
+import java.util.Date
 
 class MeetScraper extends Actor {
 
@@ -20,6 +21,7 @@ class MeetScraper extends Actor {
   }
 
   def scrapeMeet(meet: ScrapeMeet) = {
+    //TODO: Also scrape meet name
     // Scrape events from meet page
     val eventScrapes = for (event <- events(meet)) yield {
       // Send each event as a message to the actors
@@ -29,9 +31,13 @@ class MeetScraper extends Actor {
     // Get overall meet status (completed) by folding up status of individual events. Any non-completed event
     // will cause the entire meet to be considered incomplete
     import context.dispatcher
-    val meetCompletedFuture = Future.fold(eventScrapes)(true)((agg: Boolean, evt: EventScraped) => agg && evt.completed)
-    val meetCompleted = Await.result(meetCompletedFuture, 5 minutes);
-    log.debug("Meet {} completed: {}", meet.name, meetCompleted)
+    val meetCompleted = Future.fold(eventScrapes)(true)((agg: Boolean, evt: EventScraped) => agg && evt.completed)
+    //val meetCompleted = Await.result(meetCompletedFuture, 5 minutes);
+    for(x <- meetCompleted; if x) {
+      // Save meet status
+      meet.url.inProgress(false).lastCompleted(new Date()).save
+      log.info("Meet {} is completed", meet.name)
+    }    
   }
 
   /**
@@ -41,7 +47,7 @@ class MeetScraper extends Actor {
     var lEvents = List[Event]()
     for (line <- meet.eventsPage.getLines(); m <- EventLink findAllIn line) m match {
       case EventLink(id, name) =>
-        val eventUrl = meet.url + "/" + id + ".htm"
+        val eventUrl = meet.url.id.is + "/" + id + ".htm"
         lEvents = new Event(id, meet.name, name.trim, eventUrl) :: lEvents
     }
     lEvents.reverse

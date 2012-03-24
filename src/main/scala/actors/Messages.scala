@@ -1,16 +1,15 @@
 package actors
 
-import model.Result
 import io.{BufferedSource, Source}
+import model.{MeetUrl, Result}
 
-case class ScrapeMeet(url: String) {
+case class ScrapeMeet(url: MeetUrl) {
 
   def eventsPage: BufferedSource = {
-    val eventsUrl = url + "/evtindex.htm"
-
-    Source.fromURL(eventsUrl)
+    Source.fromURL(url.eventIndexUrl)
   }
 
+  // TODO: Move logic for determining name into MeetScraper (when getting event list)
   var meetName: String = null;
 
   def name: String = {

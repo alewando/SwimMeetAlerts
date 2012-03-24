@@ -26,6 +26,7 @@ class EventScraper extends Actor {
     var completedCount = 0;
     var incompleteCount = 0;
     try {
+      // TODO: Use spray client to get event page
       val page = Source.fromURL(event.url)
       // Parse results
       for (line <- page.getLines()) line match {
@@ -47,6 +48,7 @@ class EventScraper extends Actor {
       case e: Exception => log.error("Error scraping event {}: {}", event.id, e)
     }
     val eventCompleted = completedCount > 0
+    // TODO: Save completed event to Mongo collection, use as filter for scraping
     log.debug("Done scraping event {}, {} with final times, {} without", Array[AnyRef](event.id, completedCount.toString, incompleteCount.toString))
     sender ! EventScraped(event, eventCompleted)
   }

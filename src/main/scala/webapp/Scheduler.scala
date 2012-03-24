@@ -3,17 +3,18 @@ package webapp
 import org.quartz.impl.StdSchedulerFactory
 import org.quartz._
 import org.slf4j.LoggerFactory
-import model.MeetUrl
+import org.joda.time.DateTime
 import cc.spray.client.HttpConduit
 import java.net.URL
 import cc.spray.http._
 import cc.spray.http.HttpMethods._
-import org.joda.time.format.DateTimeFormat
 import akka.dispatch.Future
-import org.joda.time.{LocalDate, DateTime}
+import java.text.SimpleDateFormat
+import java.util.Date
+import actors.ScrapeMeet
+import model.MeetUrl
 
 object Scheduler {
-  val driver = WebApp.driver
   val scheduler = StdSchedulerFactory.getDefaultScheduler();
   scheduler.start();
 
@@ -37,34 +38,46 @@ object Scheduler {
 
 class ScraperJob extends Job {
   val log = LoggerFactory.getLogger(this.getClass)
-
-  val dateParser = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss Z")
+  val driver = WebApp.driver
 
   override def execute(ctx: JobExecutionContext) {
     log.debug("Running meet scraper job")
-    //WebApp.driver ! ScrapeMeet(Config.BASE_URL+"/"+Config.DEFAULT_MEET_ID)
-    val cutoffDate = new LocalDate().minusWeeks(2)
-    val meetsToScrape = MeetUrl.findAll map {
-      url =>
-        val lastMod = getLastModified(url.id.value)
-        if (url.completed.value) {
 
+    // Check all of the registered meet URLs
+    val twoWeeksAgo = DateTime.now.minusWeeks(2).toDate
+    for (url <- MeetUrl.findAll; lastMod <- getLastModified(url)) {
+      if (url.inProgress.value) {
+        // Mark as complete if we've been scraping for 2 weeks without completion
+        if (lastMod.compareTo(twoWeeksAgo) < 0) {
+          log.warn("Meet {} has been in progress for two weeks, marking as complete", url.id.is)
+          url.inProgress(false).lastCompleted(new Date()).save
+        } else {
+          // Otherwise, scrape the meet for latest results
+          log.debug("Scraping in-progress meet: {}", url.id.is)
+          driver ! ScrapeMeet(url)
         }
-
+      } else if (lastMod.compareTo(url.lastCompleted.is) > 0) {
+        // Completed date is older than the last modified date, this URL is active again
+        log.info("Meet {} has become active", url.id.is)
+        url.inProgress(true).save
+        log.debug("Scraping newly active meet: {}", url.id.is)
+        driver ! ScrapeMeet(url)
+      }
     }
   }
 
-  def getLastModified(url: String): Future[DateTime] = {
-    val u = new URL(url)
+  def getLastModified(url: MeetUrl): Future[Date] = {
+    val dateParser = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z")
+    val u = new URL(url.id.is)
     val conduit = new HttpConduit(u.getHost())
     val headResp = conduit.sendReceive(HttpRequest(HEAD, "/evtindex.htm"))
     headResp map {
       resp => resp.headers.find(_.name equals "Last-Modified") map {
         x =>
-          dateParser.parseDateTime(x.value)
+          dateParser.parse(x.value)
       } getOrElse {
         log.warn("URL {} has no Last-Modified header, using current date")
-        DateTime.now
+        new Date()
       }
     }
   }

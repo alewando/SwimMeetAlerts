@@ -27,6 +27,13 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
     log.info("User {} now watching swimmer: {}", user.shortName, this)
   }
 
+  def removeWatcher(user: User) {
+    Swimmer.update(("_id" -> this.id.is) , ("$pull" -> ("watchers", user.id.asInstanceOf[ObjectId])))
+    User.update(("_id"-> user.id.asInstanceOf[ObjectId]), ("$pull" -> ("watching", this.id.is)))
+    log.info("User {} is no longer watching swimmer: {}", user.shortName, this)
+  }
+
+
   def addResult(result: Result) {
     Swimmer.update(("_id" -> this.id.is), ("$push" ->("results", result.asJValue)))
   }
