@@ -33,11 +33,11 @@ class MeetScraper extends Actor {
     import context.dispatcher
     val meetCompleted = Future.fold(eventScrapes)(true)((agg: Boolean, evt: EventScraped) => agg && evt.completed)
     //val meetCompleted = Await.result(meetCompletedFuture, 5 minutes);
-    for(x <- meetCompleted; if x) {
+    for (x <- meetCompleted; if x) {
       // Save meet status
       meet.url.inProgress(false).lastCompleted(new Date()).save
-      log.info("Meet {} is completed", meet.name)
-    }    
+      log.info("Meet \"{}\" is completed ({})", meet.name, meet.url.id.is)
+    }
   }
 
   /**

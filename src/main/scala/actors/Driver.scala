@@ -6,12 +6,8 @@ import akka.routing.RoundRobinRouter
 import org.joda.time.DateTime
 import model.MeetUrl
 import java.util.Date
-import cc.spray.http.HttpRequest
-import cc.spray.client.HttpConduit
-import cc.spray.http.HttpMethods._
 import java.text.SimpleDateFormat
-import akka.dispatch.Future
-import java.net.URL
+import dispatch._
 
 class Driver extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
@@ -21,7 +17,7 @@ class Driver extends Actor {
 
   def receive = {
     case meetReq: ScrapeMeet => meetScraper forward meetReq
-    //case ScrapeAllMeets => scrapeAll
+    case ScrapeAllMeets => scrapeAll
   }
 
   def scrapeAll = {
@@ -31,7 +27,8 @@ class Driver extends Actor {
     for (url <- MeetUrl.findAll) {
       log.debug("Meet URL is {}", url.id.is)
     }
-    for (url <- MeetUrl.findAll; lastMod <- getLastModified(url)) {
+    for (url <- MeetUrl.findAll) {
+      val lastMod = getLastModified(url)
       log.debug("Last modified date for URL {} is {}", url.id.is, lastMod)
       if (url.inProgress.value) {
         // Mark as complete if we've been scraping for 2 weeks without completion
@@ -53,22 +50,21 @@ class Driver extends Actor {
     }
   }
 
-  def getLastModified(url: MeetUrl): Future[Date] = {
+  def getLastModified(meetUrl: MeetUrl): Date = {
     val dateParser = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z")
-    val u = new URL(url.id.is)
-    log.debug("creating conduit")
-    val conduit = new HttpConduit(u.getHost())
-    log.debug("Executing HEAD request for {}", u)
-    val headResp = conduit.sendReceive(HttpRequest(HEAD, "/evtindex.htm"))
-    headResp map {
-      resp => resp.headers.find(_.name equals "Last-Modified") map {
-        x =>
-          dateParser.parse(x.value)
-      } getOrElse {
-        log.warn("URL {} has no Last-Modified header, using current date")
-        new Date()
+    val idxUrl = meetUrl.id.is + "/evtindex.htm"
+    val u = url(idxUrl)
+    log.debug("Executing HEAD request for {}", idxUrl)
+    Http(u >:> {
+      headers: Map[String, Set[String]] => {
+        headers.get("Last-Modified") match {
+          case Some(vals) => dateParser.parse(vals.head)
+          case _ =>
+            log.warn("URL {} has no Last-Modified header, using current date", idxUrl)
+            new Date()
+        }
       }
-    }
+    })
   }
 
 
