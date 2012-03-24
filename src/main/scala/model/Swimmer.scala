@@ -28,8 +28,8 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   }
 
   def removeWatcher(user: User) {
-    Swimmer.update(("_id" -> this.id.is) , ("$pull" -> ("watchers", user.id.asInstanceOf[ObjectId])))
-    User.update(("_id"-> user.id.asInstanceOf[ObjectId]), ("$pull" -> ("watching", this.id.is)))
+    Swimmer.update(("_id" -> this.id.is), ("$pull" ->("watchers", user.id.asInstanceOf[ObjectId])))
+    User.update(("_id" -> user.id.asInstanceOf[ObjectId]), ("$pull" ->("watching", this.id.is)))
     log.info("User {} is no longer watching swimmer: {}", user.shortName, this)
   }
 
@@ -63,8 +63,8 @@ object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
       case _ => {
         searchName match {
           case NamePattern(first, mi, last) => {
-            //log.debug("Searching for name w/o MI: {} {}", first, last)
-            find("name.searchName" -> first + " " + last)
+            //log.debug("Searching for name w/o MI: \"{} {}\"", first, last)
+            find("name.searchName" -> (first + " " + last))
           }
           case _ => Empty
         }

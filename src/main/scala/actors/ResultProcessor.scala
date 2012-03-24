@@ -22,6 +22,7 @@ class ResultProcessor extends Actor {
 
     // See if this scrapedResult is for a swimmer being watched
     val swimmer = Swimmer.findForResult(scrapedResult) openOr {
+      //log.debug("Not a tracked swimmer: {}", scrapedResult.entrant)
       return
     }
     log.debug("Result for tracked swimmer: " + scrapedResult)
@@ -34,7 +35,7 @@ class ResultProcessor extends Actor {
       swimmer.addResult(result)
 
       // Get emails for swimmer's watchers
-      val emailRecips : List[String]= getEmailRecipientsForSwimmer(swimmer) match {
+      val emailRecips: List[String] = getEmailRecipientsForSwimmer(swimmer) match {
         case Nil => {
           log.info("Swimmer {} is being tracked, but has no follower email addresses", swimmer.name.value.fullName)
           return

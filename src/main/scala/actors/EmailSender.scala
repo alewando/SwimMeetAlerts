@@ -41,7 +41,7 @@ class EmailSender extends Actor {
 
     // TODO: Send separate email (or use BCC?)
     message.setRecipients(Message.RecipientType.TO, recipients)
-    message.setSubject("New scrapedResult for " + swimmer.name.value.fullName + ": " + result.event.name)
+    message.setSubject("New Result for " + swimmer.name.value.fullName + ": " + result.event.is)
     val body = swimmer.name.value.fullName + "\n" +
       result.meet.is + "\n" +
       result.event.is + "\n" +

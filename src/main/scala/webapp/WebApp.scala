@@ -1,6 +1,6 @@
 package webapp
 
-import actors.{Driver, EmailSender, ResultProcessor, EventScraper}
+import actors.{Driver, EmailSender, ResultProcessor}
 import akka.actor.{Props, ActorSystem}
 import org.eclipse.jetty.server.handler.{ContextHandlerCollection, ContextHandler, ResourceHandler}
 import org.eclipse.jetty.server.Server
@@ -29,13 +29,13 @@ object WebApp extends App {
 
   def initActors = {
     val system = ActorSystem("AlertsSystem")
-    system.actorOf(Props[Driver], name = "driver")
-    system.actorOf(Props[ResultProcessor].withRouter(RoundRobinRouter(15)), name = "resultProcessor")
     system.actorOf(Props[EmailSender], name = "emailSender")
+    system.actorOf(Props[ResultProcessor].withRouter(RoundRobinRouter(15)), name = "resultProcessor")
+    system.actorOf(Props[Driver], name = "driver")
     system
   }
 
-  def startJetty : Server = {
+  def startJetty: Server = {
 
     val port = if (System.getenv("PORT") != null) System.getenv("PORT").toInt else 5000
     val server = new Server
