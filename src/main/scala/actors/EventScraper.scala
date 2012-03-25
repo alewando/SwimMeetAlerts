@@ -3,6 +3,7 @@ package actors
 import akka.actor.Actor
 import org.slf4j.LoggerFactory
 import scala.io.Source
+import model.CompletedEvent
 
 
 class EventScraper extends Actor {
@@ -26,13 +27,12 @@ class EventScraper extends Actor {
     var completedCount = 0;
     var incompleteCount = 0;
     try {
-      // TODO: Use spray client to get event page
+      // TODO: Use Dispatch client to get event page
       val page = Source.fromURL(event.url)
       // Parse results
       for (line <- page.getLines()) line match {
         case ResultWithFinalTime(place, lastName, firstName, age, team, seed, finals) =>
           completedCount += 1
-          // TODO: Strip trailing initial from first name if present (ie: "Fred A")
           val result = new ScrapedResult(event, new Person(firstName.trim, lastName.trim), age.toInt, team.trim, place, seed, finals)
           resultProcessor ! result
         case RelayResultWithFinalTime(place, team, seed, finals) =>
@@ -48,7 +48,7 @@ class EventScraper extends Actor {
       case e: Exception => log.error("Error scraping event {}: {}", event.id, e)
     }
     val eventCompleted = completedCount > 0
-    // TODO: Save completed event to Mongo collection, use as filter for scraping
+    if (eventCompleted) CompletedEvent.markEventComplete(event.meetName, event.url)
     log.debug("Done scraping event {}, {} with final times, {} without", Array[AnyRef](event.id, completedCount.toString, incompleteCount.toString))
     sender ! EventScraped(event, eventCompleted)
   }

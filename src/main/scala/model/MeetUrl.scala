@@ -2,8 +2,8 @@ package model
 
 import net.liftweb.mongodb.record.{MongoMetaRecord, MongoRecord}
 import net.liftweb.mongodb.record.field.{DateField, StringPk}
-import net.liftweb.record.field.BooleanField
 import java.util.Date
+import net.liftweb.record.field.{StringField, BooleanField}
 
 class MeetUrl private() extends MongoRecord[MeetUrl] with StringPk[MeetUrl] {
   def meta = MeetUrl
@@ -12,8 +12,12 @@ class MeetUrl private() extends MongoRecord[MeetUrl] with StringPk[MeetUrl] {
     // Default to "Low" date
     override def defaultValue = new Date(0)
   }
-  
+
   object inProgress extends BooleanField[MeetUrl](this)
+
+  object name extends StringField[MeetUrl](this, 100) {
+    override def defaultValue = ""
+  }
 
   // TODO: Check for trailing slash
   def eventIndexUrl = id.is + "/evtindex.htm"
