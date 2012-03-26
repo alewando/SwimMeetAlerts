@@ -3,8 +3,9 @@ package webapp.snippet
 import net.liftweb.common.Full
 import net.liftweb.util.BindHelpers._
 import org.slf4j.LoggerFactory
-import model.{Swimmer, User}
 import net.liftweb.http.{SHtml, RequestVar}
+import model.{MeetUrl, Swimmer, User}
+import xml.Text
 
 /**
  * Snippet for the homepage
@@ -35,9 +36,7 @@ class Homepage {
 
 
   def addswimmer = {
-
     object firstName extends RequestVar("")
-
     object lastName extends RequestVar("")
 
     def processAddSwimmer() {
@@ -62,6 +61,20 @@ class Homepage {
           "#lastName" #> SHtml.text(lastName.is, lastName(_)) &
           "#submit" #> SHtml.submit("Add", processAddSwimmer)
       case _ => "*" #> ""
+    }
+  }
+
+  def inProgress = {
+    // TODO: If no meets being tracked, add Text indicating so
+    MeetUrl.inProgressMeets match {
+      case Nil => "#meet" #> Text("No meets currently active")
+      case meets =>
+        "#meet" #> meets.map {
+          url => {
+            val u = url.id.is
+            "a *" #> url.name & "a [href]" #> u
+          }
+        }
     }
   }
 }

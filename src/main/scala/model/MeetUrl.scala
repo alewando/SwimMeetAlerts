@@ -4,6 +4,8 @@ import net.liftweb.mongodb.record.{MongoMetaRecord, MongoRecord}
 import net.liftweb.mongodb.record.field.{DateField, StringPk}
 import java.util.Date
 import net.liftweb.record.field.{StringField, BooleanField}
+import net.liftweb.mongodb.BsonDSL._
+
 
 class MeetUrl private() extends MongoRecord[MeetUrl] with StringPk[MeetUrl] {
   def meta = MeetUrl
@@ -26,4 +28,7 @@ class MeetUrl private() extends MongoRecord[MeetUrl] with StringPk[MeetUrl] {
 
 object MeetUrl extends MeetUrl with MongoMetaRecord[MeetUrl] {
 
+  def inProgressMeets: List[MeetUrl] = {
+    findAll(("inProgress" -> true))
+  }
 }
