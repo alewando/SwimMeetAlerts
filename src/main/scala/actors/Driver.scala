@@ -25,9 +25,6 @@ class Driver extends Actor {
     // Check all of the registered meet URLs
     val twoWeeksAgo = DateTime.now.minusWeeks(2).toDate
     for (url <- MeetUrl.findAll) {
-      log.debug("Meet URL is {}", url.id.is)
-    }
-    for (url <- MeetUrl.findAll) {
       val lastMod = getLastModified(url)
       log.debug("Last modified date for URL {} is {}", url.id.is, lastMod)
       if (url.inProgress.value) {

@@ -39,7 +39,6 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   }
 
   def resultExists_?(candidate: ScrapedResult): Boolean = {
-    // { "results" : {"$elemMatch" : {"meet":"2011 Mason Fall Invitational", "event":"#105 Girls 500 Freexx"}}}
     Swimmer.find(
       ("results" -> ("$elemMatch" -> ("meet" -> candidate.event.meetName) ~ ("event" -> candidate.event.name)))
     ).isDefined
@@ -57,13 +56,13 @@ object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
   def findForName(fullName: String): Box[Swimmer] = {
     // Search by upper-cased name
     val searchName = fullName.toUpperCase
-    //log.debug("Searching for {}",searchName)
+    log.trace("Searching for {}",searchName)
     find("name.searchName" -> searchName) match {
       case Full(x) => Full(x)
       case _ => {
         searchName match {
           case NamePattern(first, mi, last) => {
-            //log.debug("Searching for name w/o MI: \"{} {}\"", first, last)
+            log.trace("Searching for name w/o MI: \"{} {}\"", first, last)
             find("name.searchName" -> (first + " " + last))
           }
           case _ => Empty

@@ -73,14 +73,13 @@ class LiftBootstrap extends Bootable {
     // Add REST dispatches
     LiftRules.statelessDispatchTable.append(ScrapeRestHandler)
 
-    // Configure the database
+    // Configure the database for lift-record
     initDb
   }
 
   def initDb {
     val url = Config.DATABASE_URL
-    log.info("Mongo DB URL=" + url
-    )
+    log.info("Mongo DB URL: {}",url)
     if (url.getUsername != null) {
       MongoDB.defineDbAuth(DefaultMongoIdentifier, new Mongo(url), url.getDatabase, url.getUsername, new String(url.getPassword))
     } else {
