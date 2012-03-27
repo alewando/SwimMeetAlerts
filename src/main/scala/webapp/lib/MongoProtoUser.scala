@@ -1,27 +1,16 @@
 package webapp.lib
 
-import _root_.scala.xml.{NodeSeq, Node, Text, Elem}
 import net.liftweb.mongodb.record.field._
 import net.liftweb.record.Field
-import net.liftweb.common._
-import _root_.net.liftweb.http.{S, js, SHtml}
-import js._
-import JsCmds._
-import _root_.scala.xml.{NodeSeq, Node, Text, Elem}
-import _root_.scala.xml.transform._
-import _root_.net.liftweb.sitemap._
-import _root_.net.liftweb.sitemap.Loc._
+import _root_.net.liftweb.http.S
+import _root_.scala.xml.{NodeSeq, Text}
 import _root_.net.liftweb.util.Helpers._
 import _root_.net.liftweb.util._
 import _root_.net.liftweb.common._
-import _root_.net.liftweb.util.Mailer._
 import S._
 import _root_.net.liftweb.proto.{ProtoUser => GenProtoUser}
 import net.liftweb.mongodb.record.{MongoRecord, MongoId, MongoMetaRecord}
-import net.liftweb.mongodb._
-import _root_.net.liftweb.json.DefaultFormats
 import _root_.net.liftweb.json.JsonDSL._
-import _root_.net.liftweb.json.JsonAST.JObject
 
 import net.liftweb.record.field._
 
