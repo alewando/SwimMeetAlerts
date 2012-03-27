@@ -21,12 +21,7 @@ class EmailSender extends Actor {
 
   def receive = {
     case (swimmer: Swimmer, result: Result, recipients: List[String]) =>
-      try {
         sendEmail(swimmer, result, recipients)
-      } catch {
-        // TODO: Let actor's parent handle the error
-        case e => log.error("Error sending email", e)
-      }
   }
 
   def sendEmail(swimmer: Swimmer, result: Result, recipientAddresses: List[String]) {
