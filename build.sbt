@@ -14,29 +14,26 @@ resolvers += "Scala Tools Snapshots" at "http://scala-tools.org/repo-snapshots"
 
 resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases"
 
-//resolvers += "Spray http lib Repo" at "http://repo.spray.cc/"
-
-//resolvers += "repo.novus rels" at "http://repo.novus.com/snapshots/"
-
 libraryDependencies ++= {
-  val liftVersion = "2.4-M4" 
+  val liftVersion = "2.4"
   Seq(
-    "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default" withSources(),
-    "net.liftweb" %% "lift-mapper" % liftVersion % "compile->default" withSources(),
-    "net.liftweb" %% "lift-mongodb" % liftVersion % "compile->default" withSources(),
-    "net.liftweb" %% "lift-mongodb-record" % liftVersion % "compile->default" withSources()
+    "net.liftweb" %% "lift-webkit" % liftVersion % "compile->default",
+    "net.liftweb" %% "lift-mongodb-record" % liftVersion % "compile->default"
   )
 }
 
 libraryDependencies ++= Seq(
     "com.typesafe.akka" % "akka-actor" % "2.0",
     "com.typesafe.akka" % "akka-slf4j" % "2.0",
-    "net.databinder" %% "dispatch-http" % "0.8.8",
+    "net.databinder" %% "dispatch-http" % "0.8.8" excludeAll(
+        ExclusionRule(organization="commons-logging")
+    ),
     "joda-time" % "joda-time" % "2.1",
     "org.joda" % "joda-convert" % "1.2",
     "javax.mail" % "mail" % "1.4.1",
     "org.mongodb" % "mongo-java-driver" % "2.7.3",
-    "org.slf4j" % "slf4j-api" % "1.6.1" withSources(),
+    "org.slf4j" % "slf4j-api" % "1.6.1",
+    "org.slf4j" % "jcl-over-slf4j" % "1.6.1",
     "ch.qos.logback" % "logback-classic" % "0.9.26",
     "org.scala-tools.testing" %% "specs" % "1.6.9" % "test",
     "junit" % "junit" % "4.7" % "test"
