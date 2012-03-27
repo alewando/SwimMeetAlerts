@@ -1,6 +1,5 @@
 package webapp
 
-import actors.{Driver, EmailSender, ResultProcessor}
 import akka.actor.{Props, ActorSystem}
 import org.eclipse.jetty.server.handler.{ContextHandlerCollection, ContextHandler, ResourceHandler}
 import org.eclipse.jetty.server.Server
@@ -8,6 +7,8 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector
 import org.eclipse.jetty.webapp.WebAppContext
 import org.slf4j.LoggerFactory
 import akka.routing.RoundRobinRouter
+import akka.util.duration._
+import actors.{ScrapeAllMeets, Driver, EmailSender, ResultProcessor}
 
 object WebApp extends App {
 
@@ -22,7 +23,7 @@ object WebApp extends App {
 
   // Start the scheduler
   log.info("Starting scheduler")
-  Scheduler.scheduleJobs
+  scheduleJobs
 
   // Join the Jetty server thread
   jettyServer.join()
@@ -33,6 +34,11 @@ object WebApp extends App {
     system.actorOf(Props[ResultProcessor].withRouter(RoundRobinRouter(15)), name = "resultProcessor")
     system.actorOf(Props[Driver], name = "driver")
     system
+  }
+
+  def scheduleJobs {
+    // Every 10 minutes (starting immediately), execute the scraper job
+    actors.scheduler.schedule(0 nanos , 10 minutes, driver, ScrapeAllMeets)
   }
 
   def startJetty: Server = {

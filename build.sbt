@@ -2,6 +2,8 @@ import com.typesafe.startscript.StartScriptPlugin
 
 seq(StartScriptPlugin.startScriptForClassesSettings: _*)
 
+seq(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
+
 name := "SwimMeetAlerts"
 
 scalaVersion := "2.9.1"
@@ -33,7 +35,6 @@ libraryDependencies ++= Seq(
     "joda-time" % "joda-time" % "2.1",
     "org.joda" % "joda-convert" % "1.2",
     "javax.mail" % "mail" % "1.4.1",
-    "org.quartz-scheduler" % "quartz" % "2.1.3",
     "org.mongodb" % "mongo-java-driver" % "2.7.3",
     "org.slf4j" % "slf4j-api" % "1.6.1" withSources(),
     "ch.qos.logback" % "logback-classic" % "0.9.26",
