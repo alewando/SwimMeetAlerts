@@ -7,7 +7,7 @@ import org.bson.types.ObjectId
 import net.liftweb.record.field.StringField
 import net.liftweb.common.{Box, Empty, Full}
 import actors.ScrapedResult
-import net.liftweb.mongodb.record.field.{BsonRecordListField, BsonRecordField, MongoListField, ObjectIdPk}
+import net.liftweb.mongodb.record.field.{ObjectIdField, BsonRecordListField, BsonRecordField, MongoListField, ObjectIdPk}
 
 class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   def meta = Swimmer
@@ -19,6 +19,14 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   object watchers extends MongoListField[Swimmer, ObjectId](this)
 
   object results extends BsonRecordListField(this, Result)
+
+  // If this field has a value, this record is just a reference to another swimmer record. 
+  // It exists only so that a swimmer can be found be searching on a nickname/alias (ie: 'Joe' for 'Joseph')
+  object aliasFor extends ObjectIdField[Swimmer](this) {
+    override def optional_? = true
+
+    override def defaultValueBox = Empty
+  }
 
   def addWatcher(user: User) {
     Swimmer.update(("_id" -> this.id.is), ("$addToSet" ->("watchers", user.id.asInstanceOf[ObjectId])))
@@ -56,8 +64,8 @@ object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
   def findForName(fullName: String): Box[Swimmer] = {
     // Search by upper-cased name
     val searchName = fullName.toUpperCase
-    log.trace("Searching for {}",searchName)
-    find("name.searchName" -> searchName) match {
+    log.trace("Searching for {}", searchName)
+    val res = find("name.searchName" -> searchName) match {
       case Full(x) => Full(x)
       case _ => {
         searchName match {
@@ -70,6 +78,7 @@ object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
       }
     }
     // TODO: Support 'alias' records, containing a pointer to another swimmer record
+    res
   }
 
   def findForResult(result: ScrapedResult): Box[Swimmer] = {
