@@ -17,7 +17,12 @@ class Swimmers {
           def processWatch() {
             swimmer.addWatcher(user)
           }
-          "#name" #> swimmer.name.is.fullName & "#submit" #> SHtml.submit("Watch", processWatch)
+          def clearResults() {
+            log.info("Clearing results for swimmer {}", swimmer.name)
+            swimmer.results(Nil).save
+          }
+          val sel = "#name" #> swimmer.name.is.fullName & "#submit" #> SHtml.submit("Watch", processWatch)
+          sel & "#clearResults" #> SHtml.submit("Clear Results", clearResults)
       }
   }
 
