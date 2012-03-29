@@ -65,9 +65,8 @@ class Homepage {
   }
 
   def inProgress = {
-    // TODO: If no meets being tracked, add Text indicating so
     MeetUrl.inProgressMeets match {
-      case Nil => "#meet" #> Text("No meets currently active")
+      case Nil => "#meet" #> Text("None active")
       case meets =>
         "#meet" #> meets.map {
           url => {

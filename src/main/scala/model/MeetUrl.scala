@@ -6,9 +6,16 @@ import java.util.Date
 import net.liftweb.record.field.{StringField, BooleanField}
 import net.liftweb.mongodb.BsonDSL._
 
+import dispatch._
+import org.slf4j.LoggerFactory
+
 
 class MeetUrl private() extends MongoRecord[MeetUrl] with StringPk[MeetUrl] {
   def meta = MeetUrl
+
+  val log = LoggerFactory.getLogger(getClass)
+
+  def eventIndexPage = "evtindex.htm"
 
   object lastCompleted extends DateField[MeetUrl](this) {
     // Default to "Low" date
@@ -21,8 +28,24 @@ class MeetUrl private() extends MongoRecord[MeetUrl] with StringPk[MeetUrl] {
     override def defaultValue = ""
   }
 
-  // TODO: Check for trailing slash
-  def eventIndexUrl = id.is + "/evtindex.htm"
+  def eventIndexUrl = id.is match {
+    case x if x.endsWith("/") => id.is + eventIndexPage
+    case _ => id.is + "/" + eventIndexPage
+  }
+
+  def validMeetUrl_? : Boolean = {
+    // Look for an event index page
+    val u = url(eventIndexUrl)
+    try {
+      u.HEAD >:> identity
+      true
+    } catch {
+      case StatusCode(_,_) => {
+        log.info("Not a valid meet URL: {}", eventIndexUrl)
+        false
+      }
+    }
+  }
 
 }
 
@@ -31,4 +54,5 @@ object MeetUrl extends MeetUrl with MongoMetaRecord[MeetUrl] {
   def inProgressMeets: List[MeetUrl] = {
     findAll(("inProgress" -> true))
   }
+
 }

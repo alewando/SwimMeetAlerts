@@ -24,6 +24,7 @@ class Driver extends Actor {
     log.info("Processing all registered meet URLs")
     // Check all of the registered meet URLs
     val twoWeeksAgo = DateTime.now.minusWeeks(2).toDate
+    var count = 0;
     for (url <- MeetUrl.findAll) {
       val lastMod = getLastModified(url)
       log.debug("Last modified date for URL {} is {}", url.id.is, lastMod)
@@ -36,6 +37,7 @@ class Driver extends Actor {
           // Otherwise, scrape the meet for latest results
           log.debug("Scraping in-progress meet: {}", url.id.is)
           self ! ScrapeMeet(url)
+          count += 1
         }
       } else if (lastMod.compareTo(url.lastCompleted.is) > 0) {
         // Completed date is older than the last modified date, this URL is active again
@@ -43,8 +45,10 @@ class Driver extends Actor {
         url.inProgress(true).save
         log.debug("Scraping newly active meet: {}", url.id.is)
         self ! ScrapeMeet(url)
+        count += 1
       }
     }
+    if (count == 0) log.info("No active meets")
   }
 
   def getLastModified(meetUrl: MeetUrl): Date = {
