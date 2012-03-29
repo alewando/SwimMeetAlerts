@@ -40,8 +40,9 @@ class MeetScraper extends Actor {
     for (x <- meetCompleted; if x) {
       // Save meet status
       meet.url.inProgress(false).lastCompleted(new Date()).save
-      // TODO: Remove records for this meet from CompletedEvents collection
       log.info("Meet \"{}\" is completed ({})", meetName, meet.url.id.is)
+      // Remove records for this meet from CompletedEvents collection
+      CompletedEvent.deleteEventsForMeet(meetName)
     }
   }
 

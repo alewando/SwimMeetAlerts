@@ -34,8 +34,7 @@ class EmailSender extends Actor {
 
     val recipients: Array[Address] = recipientAddresses.map(new InternetAddress(_)).toArray
 
-    // TODO: Send separate email (or use BCC?)
-    message.setRecipients(Message.RecipientType.TO, recipients)
+    message.setRecipients(Message.RecipientType.BCC, recipients)
     message.setSubject("New Result for " + swimmer.name.value.fullName + ": " + result.event.is)
     val body = swimmer.name.value.fullName + "\n" +
       result.meet.is + "\n" +
