@@ -77,8 +77,14 @@ object Swimmer extends Swimmer with MongoMetaRecord[Swimmer] {
         }
       }
     }
-    // TODO: Support 'alias' records, containing a pointer to another swimmer record
-    res
+    // Resolve 'alias' record to their referenced swimmer record
+    res map {
+      found =>
+        found.aliasFor.valueBox match {
+          case Full(id) => Swimmer.find(id) openOr found
+          case _ => found
+        }
+    }
   }
 
   def findForResult(result: ScrapedResult): Box[Swimmer] = {
