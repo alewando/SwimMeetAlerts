@@ -52,7 +52,7 @@ class Driver extends Actor {
     val idxUrl = meetUrl.id.is + "/evtindex.htm"
     val u = url(idxUrl)
     log.debug("Executing HEAD request for {}", idxUrl)
-    Http(u >:> {
+    Http(u.HEAD >:> {
       headers: Map[String, Set[String]] => {
         headers.get("Last-Modified") match {
           case Some(vals) => dateParser.parse(vals.head)
