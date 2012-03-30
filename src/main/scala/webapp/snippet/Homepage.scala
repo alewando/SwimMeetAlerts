@@ -66,7 +66,8 @@ class Homepage {
 
   def inProgress = {
     MeetUrl.inProgressMeets match {
-      case Nil => "#meet" #> Text("None active")
+      case Nil =>
+        "#meet" #> Text("None active")
       case meets =>
         "#meet" #> meets.map {
           url => {

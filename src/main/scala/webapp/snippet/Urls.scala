@@ -37,6 +37,9 @@ class Urls {
     object newUrl extends RequestVar[String]("")
 
     def doAdd() {
+      // TODO: remove '/evtindex.htm' if present
+      // TODO: verify URL
+      // TODO: Return appropriate error messages
       // Check for existing record first
       MeetUrl.find(newUrl.is) match {
         case Full(_) => log.warn("URL already being tracked: {}", newUrl.is)
