@@ -31,6 +31,7 @@ class Driver extends Actor {
       if (url.inProgress.value) {
         // Mark as complete if we've been scraping for 2 weeks without completion
         if (lastMod.compareTo(twoWeeksAgo) < 0) {
+          // TODO: alert admin of meet aging off
           log.warn("Meet {} has been in progress for two weeks, marking as complete", url.id.is)
           url.inProgress(false).lastCompleted(new Date()).save
         } else {
@@ -43,6 +44,7 @@ class Driver extends Actor {
         // Completed date is older than the last modified date, this URL is active again
         log.info("Meet {} has become active", url.id.is)
         url.inProgress(true).save
+        // TODO: alert admin of meet activation
         log.debug("Scraping newly active meet: {}", url.id.is)
         self ! ScrapeMeet(url)
         count += 1

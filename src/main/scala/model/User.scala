@@ -8,16 +8,20 @@ class User extends MegaProtoUser[User] {
   def meta = User
 
   object watching extends MongoListField[User, ObjectId](this)
-  
-  def allWatchedSwimmers : List[Swimmer] = {
+
+  def allWatchedSwimmers: List[Swimmer] = {
     for (swimmerId <- watching.value;
          swimmer <- Swimmer.find(swimmerId)
-     ) yield{swimmer}
+    ) yield {
+      swimmer
+    }
   }
 }
 
 object User extends User with MetaMegaProtoUser[User] {
   override def skipEmailValidation = true
+
+  // TODO: email admin on user signup
 
   override def loginXhtml =
     <lift:surround with="default" at="content">

@@ -32,6 +32,9 @@ class LiftBootstrap extends Bootable {
       Menu(Loc("scrape", ("util" :: "scrape" :: Nil) -> false, "Scrape Meet", isAdmin)),
       Menu(Loc("urls", ("util" :: "urls" :: Nil) -> false, "Manage URLs", isAdmin)))
 
+    // TODO: Change /util/ to /admin
+    // TODO: Add admin screens for user mgmt
+
     def sitemap(): SiteMap = SiteMap(
       Menu.i("Home") / "index",
       Menu(Loc("addMeet", ("addMeet" :: Nil) -> false, "Add Meet", isLoggedIn)),

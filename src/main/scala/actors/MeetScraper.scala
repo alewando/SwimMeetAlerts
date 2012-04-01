@@ -38,6 +38,8 @@ class MeetScraper extends Actor {
     val meetCompleted = Future.fold(eventScrapes)(true)((agg: Boolean, evt: EventScraped) => agg && evt.completed)
     //val meetCompleted = Await.result(meetCompletedFuture, 5 minutes);
     for (x <- meetCompleted; if x) {
+      // TODO: Move meet completion logic to separate method
+      // TODO: alert admin of meet completion
       // Save meet status
       meet.url.inProgress(false).lastCompleted(new Date()).save
       log.info("Meet \"{}\" is completed ({})", meetName, meet.url.id.is)
