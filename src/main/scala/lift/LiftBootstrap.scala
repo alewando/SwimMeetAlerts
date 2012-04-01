@@ -25,6 +25,7 @@ class LiftBootstrap extends Bootable {
     // where to search snippet
     LiftRules.addToPackages("webapp")
 
+    val isLoggedIn = If(() => User.loggedIn_?, () => RedirectResponse("/"))
     val isAdmin = If(() => User.superUser_?, () => RedirectResponse("/"))
     val utilMenu = Menu(Loc("Utils", ("util" :: Nil) -> false, "Utils", isAdmin),
       Menu(Loc("swimmers", ("util" :: "swimmers" :: Nil) -> false, "List Swimmers", isAdmin)),
@@ -33,6 +34,7 @@ class LiftBootstrap extends Bootable {
 
     def sitemap(): SiteMap = SiteMap(
       Menu.i("Home") / "index",
+      Menu(Loc("addMeet", ("addMeet" :: Nil) -> false, "Add Meet", isLoggedIn)),
       utilMenu
       , Menu(Loc("User Menus", ("user" :: Nil) -> false, "foo", User.AddUserMenusHere)))
 
@@ -79,7 +81,7 @@ class LiftBootstrap extends Bootable {
 
   def initDb {
     val url = Config.DATABASE_URL
-    log.info("Mongo DB URL: {}",url)
+    log.info("Mongo DB URL: {}", url)
     if (url.getUsername != null) {
       MongoDB.defineDbAuth(DefaultMongoIdentifier, new Mongo(url), url.getDatabase, url.getUsername, new String(url.getPassword))
     } else {

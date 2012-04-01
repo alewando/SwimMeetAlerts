@@ -77,4 +77,11 @@ class Homepage {
         }
     }
   }
+
+  def addMeet = {
+    User.currentUser match {
+      case Full(_) => "#link [href]" #> "addMeet"
+      case _ => "*" #> ""
+    }
+  }
 }

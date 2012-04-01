@@ -35,12 +35,13 @@ class MeetUrl private() extends MongoRecord[MeetUrl] with StringPk[MeetUrl] {
 
   def validMeetUrl_? : Boolean = {
     // Look for an event index page
-    val u = url(eventIndexUrl)
     try {
-      u.HEAD >:> identity
+      val u = url(eventIndexUrl)
+      Http(u >:> identity)
+      log.debug("URL " + eventIndexUrl + " passes")
       true
     } catch {
-      case StatusCode(_,_) => {
+      case _ => {
         log.info("Not a valid meet URL: {}", eventIndexUrl)
         false
       }

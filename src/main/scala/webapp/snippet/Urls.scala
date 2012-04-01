@@ -3,10 +3,10 @@ package webapp.snippet
 import org.slf4j.LoggerFactory
 import model.MeetUrl
 import net.liftweb.util.Helpers._
-import net.liftweb.http.{RequestVar, SHtml}
 import net.liftweb.common.Full
 import webapp.WebApp
 import actors.ScrapeAllMeets
+import net.liftweb.http.{S, RequestVar, SHtml}
 
 /**
  * Snippets for working with MeetUrl collection
@@ -37,15 +37,19 @@ class Urls {
     object newUrl extends RequestVar[String]("")
 
     def doAdd() {
-      // TODO: remove '/evtindex.htm' if present
-      // TODO: verify URL
-      // TODO: Return appropriate error messages
+      var u = newUrl.is
+      if (!u.toLowerCase.startsWith("http://")) u = "http://" + u
       // Check for existing record first
-      MeetUrl.find(newUrl.is) match {
-        case Full(_) => log.warn("URL already being tracked: {}", newUrl.is)
+      MeetUrl.find(u) match {
+        case Full(_) => S.warning("URL already being tracked: " + u)
         case _ => {
-          log.info("Adding URL {}", newUrl.is)
-          MeetUrl.createRecord.id(newUrl.is).save
+          val url: MeetUrl = MeetUrl.createRecord
+          url.id(u)
+          if (url.validMeetUrl_?) {
+            log.info("Adding URL {}", u)
+            url.save
+          }
+          else S.error("Invalid meet URL")
         }
       }
     }
