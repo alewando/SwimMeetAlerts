@@ -1,7 +1,26 @@
-.borderedBox {
+/* Color scheme generated using: http://colorschemedesigner.com/#3O31EkQlRf5Fw */
+.primary-1 { background-color: #324376 }
+.primary-2 { background-color: #334068 }
+.primary-3 { background-color: #203062 }
+.primary-4 { background-color: #8094D1 }
+.primary-5 { background-color: #A0ACD1 }
+
+.secondary-a-1 { background-color: #AE943D }
+.secondary-a-2 { background-color: #9A8541 }
+.secondary-a-3 { background-color: #917827 }
+.secondary-a-4 { background-color: #E4CD81 }
+.secondary-a-5 { background-color: #E4D6A8 }
+
+.secondary-b-1 { background-color: #AE803D }
+.secondary-b-2 { background-color: #9A7641 }
+.secondary-b-3 { background-color: #916627 }
+.secondary-b-4 { background-color: #E4BB81 }
+.secondary-b-5 { background-color: #E4CCA8 }
+
+.box {
   border-style: solid;
   border-width: 1px;
-  border-color: #FF0000;
+  border-color: #203062; // Primary-3
 }
 
 

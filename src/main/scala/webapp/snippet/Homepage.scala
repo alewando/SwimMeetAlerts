@@ -53,6 +53,8 @@ class Homepage {
       // Clear variables
       firstName("")
       lastName("")
+
+      // TODO: Get the swimmer list to reflect the new swimmer (redirect to home page?)
     }
 
     User.currentUser match {
