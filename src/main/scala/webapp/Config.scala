@@ -11,6 +11,7 @@ object Config {
   val SMTP_PASSWORD = System.getenv("SENDGRID_PASSWORD")
   val SMTP_SERVER = Option(System.getenv("SMTP_SERVER")) getOrElse "localhost"
   val EMAIL_FROM_ADDRESS = "alert@swimmeetalerts.com";
+  val ADMIN_EMAIL = Option(System.getenv("ADMIN_EMAIL")) getOrElse "admin@swimmeetalerts.com"
 
 
   def DATABASE_URL = {

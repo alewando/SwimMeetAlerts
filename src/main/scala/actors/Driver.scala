@@ -9,7 +9,7 @@ import java.util.Date
 import java.text.SimpleDateFormat
 import dispatch._
 
-class Driver extends Actor {
+class Driver extends Actor with AdminNotifier {
   val log = LoggerFactory.getLogger(this.getClass)
   val MAX_WAIT = 60000
 
@@ -31,8 +31,8 @@ class Driver extends Actor {
       if (url.inProgress.value) {
         // Mark as complete if we've been scraping for 2 weeks without completion
         if (lastMod.compareTo(twoWeeksAgo) < 0) {
-          // TODO: alert admin of meet aging off
           log.warn("Meet {} has been in progress for two weeks, marking as complete", url.id.is)
+          sendAdminEmail("Meet expiration notice", "Meet has not completed for two weeks, marking complete: %s".format(url.id.is))
           url.inProgress(false).lastCompleted(new Date()).save
         } else {
           // Otherwise, scrape the meet for latest results
@@ -44,7 +44,7 @@ class Driver extends Actor {
         // Completed date is older than the last modified date, this URL is active again
         log.info("Meet {} has become active", url.id.is)
         url.inProgress(true).save
-        // TODO: alert admin of meet activation
+        sendAdminEmail("Meet activation notice", "Meet URL has become active: %s".format(url.id.is))
         log.debug("Scraping newly active meet: {}", url.id.is)
         self ! ScrapeMeet(url)
         count += 1

@@ -21,41 +21,52 @@ class EmailSender extends Actor {
 
   def receive = {
     case (swimmer: Swimmer, result: Result, recipients: List[String]) =>
-        sendEmail(swimmer, result, recipients)
+      sendResultEmail(swimmer, result, recipients)
+    case AdminMessage(subject, message) => {
+      log.info("Sending admin email w/ subject '{}'", subject)
+      sendEmail(ADMIN_EMAIL :: Nil, subject, message)
+    }
   }
 
-  def sendEmail(swimmer: Swimmer, result: Result, recipientAddresses: List[String]) {
-    log.info("Sending email to {} for result {}", recipientAddresses, result)
+  def sendEmail(to: List[String], subject: String, body: String) {
     // Set up the mail object
     val message = new MimeMessage(session)
 
     // Set the from, to, subject, body text
     message.setFrom(new InternetAddress(EMAIL_FROM_ADDRESS))
 
-    val recipients: Array[Address] = recipientAddresses.map(new InternetAddress(_)).toArray
+    val recipients: Array[Address] = to.map(new InternetAddress(_)).toArray
 
+    // TODO: Don't use BCC if only one recipient
     message.setRecipients(Message.RecipientType.BCC, recipients)
-    message.setSubject("New Result for " + swimmer.name.value.fullName + ": " + result.event.is)
+    message.setSubject(subject)
+    message.setText(body)
+
+    // Send the message
+    try {
+      val trans = session.getTransport("smtp")
+      trans.connect(SMTP_SERVER, 25, SMTP_USER, SMTP_PASSWORD)
+      trans.sendMessage(message, message.getAllRecipients())
+      trans.close()
+    } catch {
+      case e =>
+        log.error("send failed, exception: " + e);
+    }
+
+  }
+
+  def sendResultEmail(swimmer: Swimmer, result: Result, recipientAddresses: List[String]) {
+    log.info("Sending email to {} for result {}", recipientAddresses, result)
+
+    val subject = "New Result for " + swimmer.name.value.fullName + ": " + result.event.is
     val body = swimmer.name.value.fullName + "\n" +
       result.meet.is + "\n" +
       result.event.is + "\n" +
       "Place: " + result.place.is + "\n" +
       "Seed time: " + result.seedTime.is + "\n" +
       "Final time: " + result.finalTime.is + "\n";
-    message.setText(body)
 
-    try {
-      sendMessage(message)
-    } catch {
-      case e =>
-        log.error("send failed, exception: " + e);
-    }
+    sendEmail(recipientAddresses, subject, body)
   }
 
-  def sendMessage(msg: Message) = {
-    val trans = session.getTransport("smtp")
-    trans.connect(SMTP_SERVER, 25, SMTP_USER, SMTP_PASSWORD)
-    trans.sendMessage(msg, msg.getAllRecipients())
-    trans.close()
-  }
 }

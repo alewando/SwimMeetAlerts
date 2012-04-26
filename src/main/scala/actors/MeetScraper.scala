@@ -10,7 +10,7 @@ import java.util.Date
 import io.Source
 import model.CompletedEvent
 
-class MeetScraper extends Actor {
+class MeetScraper extends Actor with AdminNotifier {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -39,7 +39,7 @@ class MeetScraper extends Actor {
     //val meetCompleted = Await.result(meetCompletedFuture, 5 minutes);
     for (x <- meetCompleted; if x) {
       // TODO: Move meet completion logic to separate method
-      // TODO: alert admin of meet completion
+      sendAdminEmail("Meet completion notice", "Meet completed (all events complete) : %s".format(meet.url.id.is))
       // Save meet status
       meet.url.inProgress(false).lastCompleted(new Date()).save
       log.info("Meet \"{}\" is completed ({})", meetName, meet.url.id.is)
