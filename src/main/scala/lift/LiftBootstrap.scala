@@ -27,7 +27,7 @@ class LiftBootstrap extends Bootable {
 
     val isLoggedIn = If(() => User.loggedIn_?, () => RedirectResponse("/"))
     val isAdmin = If(() => User.superUser_?, () => RedirectResponse("/"))
-    val utilMenu = Menu(Loc("Utils", ("admin" :: Nil) -> false, "Admin", isAdmin),
+    val adminMenu = Menu(Loc("Admin", ("admin" :: Nil) -> false, "Admin", isAdmin),
       Menu(Loc("swimmers", ("admin" :: "swimmers" :: Nil) -> false, "List Swimmers", isAdmin)),
       Menu(Loc("scrape", ("admin" :: "scrape" :: Nil) -> false, "Scrape Meet", isAdmin)),
       Menu(Loc("urls", ("admin" :: "urls" :: Nil) -> false, "Manage URLs", isAdmin)))
@@ -37,7 +37,7 @@ class LiftBootstrap extends Bootable {
     def sitemap(): SiteMap = SiteMap(
       Menu.i("Home") / "index",
       Menu(Loc("addMeet", ("addMeet" :: Nil) -> false, "Add Meet", isLoggedIn)),
-      utilMenu
+      adminMenu
       , Menu(Loc("User Menus", ("user" :: Nil) -> false, "foo", User.AddUserMenusHere)))
 
     // set the sitemap.  Note if you don't want access control for
