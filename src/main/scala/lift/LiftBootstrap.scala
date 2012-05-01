@@ -27,12 +27,11 @@ class LiftBootstrap extends Bootable {
 
     val isLoggedIn = If(() => User.loggedIn_?, () => RedirectResponse("/"))
     val isAdmin = If(() => User.superUser_?, () => RedirectResponse("/"))
-    val utilMenu = Menu(Loc("Utils", ("util" :: Nil) -> false, "Utils", isAdmin),
-      Menu(Loc("swimmers", ("util" :: "swimmers" :: Nil) -> false, "List Swimmers", isAdmin)),
-      Menu(Loc("scrape", ("util" :: "scrape" :: Nil) -> false, "Scrape Meet", isAdmin)),
-      Menu(Loc("urls", ("util" :: "urls" :: Nil) -> false, "Manage URLs", isAdmin)))
+    val utilMenu = Menu(Loc("Utils", ("admin" :: Nil) -> false, "Admin", isAdmin),
+      Menu(Loc("swimmers", ("admin" :: "swimmers" :: Nil) -> false, "List Swimmers", isAdmin)),
+      Menu(Loc("scrape", ("admin" :: "scrape" :: Nil) -> false, "Scrape Meet", isAdmin)),
+      Menu(Loc("urls", ("admin" :: "urls" :: Nil) -> false, "Manage URLs", isAdmin)))
 
-    // TODO: Change /util/ to /admin
     // TODO: Add admin screens for user mgmt
 
     def sitemap(): SiteMap = SiteMap(
