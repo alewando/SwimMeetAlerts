@@ -1,16 +1,19 @@
 package actors
 
-import akka.actor.Actor
+import webapp.WebApp
+import org.slf4j.LoggerFactory
+
 
 /**
  * Trait for sending notifications to the system admin
  */
 
-trait AdminNotifier extends Actor {
+trait AdminNotifier {
 
-  val adminNotifier = context.actorFor("/user/emailSender")
+  val adminNotifier = WebApp.actors.actorFor("/user/emailSender")
 
   def sendAdminEmail(subject: String, message: String) {
+    LoggerFactory.getLogger(this.getClass).info("Sending admin email: {}", subject)
     adminNotifier ! AdminMessage(subject, message)
   }
 
