@@ -45,7 +45,6 @@ class Driver extends Actor with AdminNotifier {
         log.info("Meet {} has become active", url.id.is)
         url.inProgress(true).save
         sendAdminEmail("Meet activation notice", "Meet URL has become active: %s".format(url.id.is))
-        log.debug("Scraping newly active meet: {}", url.id.is)
         self ! ScrapeMeet(url)
         count += 1
       }
