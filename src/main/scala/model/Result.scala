@@ -3,6 +3,7 @@ package model
 import net.liftweb.mongodb.record.{MongoMetaRecord, MongoRecord}
 import net.liftweb.mongodb.record.field.ObjectIdPk
 import net.liftweb.record.field.{StringField, IntField}
+import xml.NodeSeq
 
 class Result private() extends MongoRecord[Result] with ObjectIdPk[Result] {
   def meta = Result
@@ -20,6 +21,18 @@ class Result private() extends MongoRecord[Result] with ObjectIdPk[Result] {
   object seedTime extends StringField(this, 50)
 
   object finalTime extends StringField(this, 50)
+
+  def toShortHtml: NodeSeq = {
+    <div class="result">
+      <span class="eventName">
+        {this.event.is}
+      </span>
+      :
+      <span class="resultTime">
+        {this.finalTime.is}
+      </span>
+    </div>
+  }
 
 }
 

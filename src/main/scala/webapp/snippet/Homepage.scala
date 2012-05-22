@@ -13,17 +13,22 @@ import xml.Text
 class Homepage {
   val log = LoggerFactory.getLogger(this.getClass)
 
+  def swimmerHtml(swimmer: Swimmer) = {
+    <li>
+      {swimmer.name.is.fullName}<div class="results">
+      {swimmer.recentEventsHtml}
+    </div>
+    </li>
+  }
+
   def listSwimmers = {
     User.currentUser match {
       case Full(user) =>
         "#entry" #> {
           user.allWatchedSwimmers map {
             s =>
-              def processRemove() = {
-                s.removeWatcher(user)
-              }
-
-              "#name" #> s.name.get.fullName & "#remove" #> SHtml.submit("Remove", processRemove)
+              "#swimmerName" #> s.name.is.fullName &
+                "#results" #> s.recentEventsHtml
           }
         }
       case _ => "*" #> <div>

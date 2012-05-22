@@ -58,6 +58,8 @@ class EmailSender extends Actor {
   def sendResultEmail(swimmer: Swimmer, result: Result, recipientAddresses: List[String]) {
     log.info("Sending email to {} for result {}", recipientAddresses, result)
 
+    // TODO: Calculate delta between seed and final times (use joda Period to parse, convert to Duration for calc)
+
     val subject = "New Result for " + swimmer.name.value.fullName + ": " + result.event.is
     val body = swimmer.name.value.fullName + "\n" +
       result.meet.is + "\n" +

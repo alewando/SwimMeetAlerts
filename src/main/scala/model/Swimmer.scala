@@ -8,6 +8,7 @@ import net.liftweb.record.field.StringField
 import net.liftweb.common.{Box, Empty, Full}
 import actors.ScrapedResult
 import net.liftweb.mongodb.record.field.{ObjectIdField, BsonRecordListField, BsonRecordField, MongoListField, ObjectIdPk}
+import xml.NodeSeq
 
 class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   def meta = Swimmer
@@ -50,6 +51,24 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
     Swimmer.find(
       ("results" -> ("$elemMatch" -> ("meet" -> candidate.event.meetName) ~ ("event" -> candidate.event.name)))
     ).isDefined
+  }
+
+  def recentEventsHtml: NodeSeq = {
+    val mostRecentMeet = results.is.head.meet.is
+    log.info("Most recent event for swimmer {} is {}", this.name, mostRecentMeet)
+    <div class="meetName">
+      {mostRecentMeet}
+    </div> <ul>
+      {this.results.is filter {
+        _.meet.is == mostRecentMeet
+      } map {
+        result => {
+          <li>
+            {result.toShortHtml}
+          </li>
+        }
+      } toSeq}
+    </ul>
   }
 
 }
