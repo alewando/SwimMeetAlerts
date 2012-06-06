@@ -56,19 +56,29 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
   def recentEventsHtml: NodeSeq = {
     val mostRecentMeet = results.is.head.meet.is
     log.info("Most recent event for swimmer {} is {}", this.name, mostRecentMeet)
-    <div class="meetName">
-      {mostRecentMeet}
-    </div> <ul>
-      {this.results.is filter {
+    <div class="swimmerResults">
+      <h3>
+        {mostRecentMeet}
+      </h3> <div class="eventResults">
+      <table>
+        {this.results.is filter {
         _.meet.is == mostRecentMeet
       } map {
         result => {
-          <li>
-            {result.toShortHtml}
-          </li>
+          <tr>
+            <td>
+              {result.event}
+            </td> <td>
+            {result.finalTime}
+          </td> <td>
+            {result.seedTime}
+          </td>
+          </tr>
         }
       } toSeq}
-    </ul>
+      </table>
+    </div>
+    </div>
   }
 
 }
