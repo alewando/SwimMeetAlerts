@@ -32,6 +32,7 @@ class Homepage {
           }
         }
       case _ => "*" #> <div>
+        <h2>Welcome to Swim Meet Alerts!</h2>
         <a href={User.loginPageURL}>Login</a>
         or
         <a href={User.signUpPath.mkString("/", "/", "")}>sign up</a>

@@ -70,9 +70,13 @@ tbody tr:nth-child(odd) td, tbody tr.odd td {
  background: #203062;
 }
 
+input {
+ color: #203062;
+}
 
 
 
+/** Buttons **/
 a.button {
 	display: -moz-inline-box;
 	display: inline-block;

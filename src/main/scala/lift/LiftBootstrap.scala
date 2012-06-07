@@ -36,7 +36,6 @@ class LiftBootstrap extends Bootable {
 
     def sitemap(): SiteMap = SiteMap(
       Menu.i("Home") / "index",
-      Menu(Loc("addMeet", ("addMeet" :: Nil) -> false, "Add Meet", isLoggedIn)),
       adminMenu
       , Menu(Loc("User Menus", ("user" :: Nil) -> false, "foo", User.AddUserMenusHere)))
 
