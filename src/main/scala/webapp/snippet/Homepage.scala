@@ -3,7 +3,6 @@ package webapp.snippet
 import net.liftweb.common.Full
 import net.liftweb.util.BindHelpers._
 import org.slf4j.LoggerFactory
-import net.liftweb.http.{SHtml, RequestVar}
 import model.{MeetUrl, Swimmer, User}
 import xml.Text
 
@@ -27,7 +26,9 @@ class Homepage {
         "#entry" #> {
           user.allWatchedSwimmers map {
             s =>
-              "#swimmerName" #> s.name.is.fullName &
+              "#swimmerName" #> <h1>
+                {s.name.is.fullName}
+              </h1> &
                 "#results" #> s.recentEventsHtml
           }
         }
@@ -37,38 +38,6 @@ class Homepage {
         or
         <a href={User.signUpPath.mkString("/", "/", "")}>sign up</a>
       </div>
-    }
-  }
-
-
-  def addswimmer = {
-    object firstName extends RequestVar("")
-    object lastName extends RequestVar("")
-
-    def processAddSwimmer() {
-      log.info("Adding swimmer. first={}, last={}", firstName.is, lastName.is)
-      // Look for an existing swimmer, or add a new one
-      val swimmer = Swimmer.findForName(firstName.is + " " + lastName.is) match {
-        case Full(swimmer) => swimmer
-        case _ => Swimmer.createForName(firstName.is, lastName.is)
-      }
-
-      // Add the current user as a watcher
-      swimmer.addWatcher(User.currentUser.get)
-
-      // Clear variables
-      firstName("")
-      lastName("")
-
-      // TODO: Get the swimmer list to reflect the new swimmer (redirect to home page?)
-    }
-
-    User.currentUser match {
-      case Full(user) =>
-        "#firstName" #> SHtml.text(firstName.is, firstName(_)) &
-          "#lastName" #> SHtml.text(lastName.is, lastName(_)) &
-          "#submit" #> SHtml.submit("Add", processAddSwimmer)
-      case _ => "*" #> ""
     }
   }
 

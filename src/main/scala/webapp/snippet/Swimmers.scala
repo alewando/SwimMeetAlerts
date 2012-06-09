@@ -2,12 +2,33 @@ package webapp.snippet
 
 import net.liftweb.util.Helpers._
 import org.slf4j.LoggerFactory
-import net.liftweb.http.{RequestVar, SHtml}
 import model.{User, Swimmer}
+import net.liftweb.common.Full
+import net.liftweb.http.{S, RequestVar, SHtml}
 
 class Swimmers {
 
   val log = LoggerFactory.getLogger(getClass())
+
+  def mySwimmers = {
+    User.currentUser match {
+      case Full(user) =>
+        "#swimmer" #> {
+          user.allWatchedSwimmers map {
+            s =>
+              "#swimmerName" #> <h1>
+                {s.name.is.fullName}
+              </h1>
+            //TODO: Button to unfollow
+            //TODO: List all results
+          }
+        }
+      case _ => "*" #> {
+        S.error("Not logged in")
+        <div></div>
+      }
+    }
+  }
 
   def listswimmers = {
     val user = User.currentUser.openTheBox
@@ -30,14 +51,29 @@ class Swimmers {
     object firstName extends RequestVar("")
     object lastName extends RequestVar("")
 
-    def processAdd() {
+    def processAddSwimmer() {
       log.info("Adding swimmer. first={}, last={}", firstName.is, lastName.is)
-      Swimmer.createForName(firstName.is, lastName.is)
+      // Look for an existing swimmer, or add a new one
+      val swimmer = Swimmer.findForName(firstName.is + " " + lastName.is) match {
+        case Full(swimmer) => swimmer
+        case _ => Swimmer.createForName(firstName.is, lastName.is)
+      }
+
+      // Add the current user as a watcher
+      swimmer.addWatcher(User.currentUser.get)
+
+      // Clear variables
+      firstName("")
+      lastName("")
     }
 
-    "#firstname" #> SHtml.text(firstName.is, firstName(_)) &
-      "#lastname" #> SHtml.text(lastName.is, lastName(_)) &
-      "#submit" #> SHtml.submit("Add", processAdd)
+    User.currentUser match {
+      case Full(user) =>
+        "#firstName" #> SHtml.text(firstName.is, firstName(_)) &
+          "#lastName" #> SHtml.text(lastName.is, lastName(_)) &
+          "#submit" #> SHtml.submit("Add", processAddSwimmer)
+      case _ => "*" #> ""
+    }
   }
 
 }

@@ -98,7 +98,7 @@ input.button {
 	overflow: visible;
 }
 a.button,
-input.button,input[type="button"] {
+input.button,input[type="button"],input[type="submit"] {
 	height: 26px;
 	padding: 0 1em;
 	border: none;
