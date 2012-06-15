@@ -53,25 +53,44 @@ class Swimmer private() extends MongoRecord[Swimmer] with ObjectIdPk[Swimmer] {
     ).isDefined
   }
 
-  def recentEventsHtml: NodeSeq = {
-    val mostRecentMeet = results.is.head.meet.is
-    log.info("Most recent event for swimmer {} is {}", this.name, mostRecentMeet)
+  def mostRecentMeetResultsHtml: NodeSeq = {
+    results.is match {
+      case Nil => <div class="swimmerResults">No Results</div>
+      case x :: xs =>
+        val mostRecentMeet = xs.last.meet.is
+        log.info("Most recent event for swimmer {} is {}", this.name, mostRecentMeet)
+        meetResultsHtml(mostRecentMeet)
+    }
+  }
+
+  def allResultsHtml: NodeSeq = {
+    results.is match {
+      case Nil => <div class="swimmerResults">No Results</div>
+      case x => {
+        val meetNames = Set.empty ++ x map (_.meet.is)
+        meetNames flatMap (meetResultsHtml(_))
+      }.toSeq
+    }
+  }
+
+  def meetResultsHtml(meet: String): NodeSeq = {
+    log.info("Showing results for meet: {}", meet)
     <div class="swimmerResults">
       <h3>
-        {mostRecentMeet}
+        {meet}
       </h3> <div class="eventResults">
       <table>
-        {this.results.is filter {
-        _.meet.is == mostRecentMeet
-      } map {
+        <tr>
+          <th>Event</th> <th>Seed Time</th> <th>Final Time</th>
+        </tr>{results.is filter (_.meet.is == meet) map {
         result => {
           <tr>
             <td>
               {result.event}
             </td> <td>
-            {result.finalTime}
-          </td> <td>
             {result.seedTime}
+          </td> <td>
+            {result.finalTime}
           </td>
           </tr>
         }

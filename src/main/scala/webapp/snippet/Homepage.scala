@@ -15,7 +15,7 @@ class Homepage {
   def swimmerHtml(swimmer: Swimmer) = {
     <li>
       {swimmer.name.is.fullName}<div class="results">
-      {swimmer.recentEventsHtml}
+      {swimmer.mostRecentMeetResultsHtml}
     </div>
     </li>
   }
@@ -29,7 +29,7 @@ class Homepage {
               "#swimmerName" #> <h1>
                 {s.name.is.fullName}
               </h1> &
-                "#results" #> s.recentEventsHtml
+                "#results" #> s.mostRecentMeetResultsHtml
           }
         }
       case _ => "*" #> <div>

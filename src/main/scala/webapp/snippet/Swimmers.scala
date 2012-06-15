@@ -18,9 +18,9 @@ class Swimmers {
             s =>
               "#swimmerName" #> <h1>
                 {s.name.is.fullName}
-              </h1>
+              </h1> & "#swimmerResults" #>
+                s.allResultsHtml
             //TODO: Button to unfollow
-            //TODO: List all results
           }
         }
       case _ => "*" #> {
