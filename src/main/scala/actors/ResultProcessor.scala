@@ -47,11 +47,12 @@ class ResultProcessor extends Actor {
   }
 
   def getEmailRecipientsForSwimmer(swimmer: Swimmer): List[String] = {
-    for (watcher <- swimmer.watchers.value;
-         u <- User.find(watcher)
+    val recipLists = for (watcher <- swimmer.watchers.value;
+                          u <- User.find(watcher)
     ) yield {
-      u.email.value
+      u.email.value :: u.extraDestinations.value
     }
+    recipLists.flatten
   }
 }
 

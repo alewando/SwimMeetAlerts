@@ -6,13 +6,23 @@ import org.bson.types.ObjectId
 import actors.AdminNotifier
 import com.mongodb.WriteConcern
 import net.liftweb.common.Empty
+import org.slf4j.LoggerFactory
+import net.liftweb.mongodb.BsonDSL._
+
 
 class User extends MegaProtoUser[User] with AdminNotifier {
   def meta = User
 
+  val log = LoggerFactory.getLogger(this.getClass)
+
   object watching extends MongoListField[User, ObjectId](this)
 
-  object alertDestinations extends MongoListField[User, String](this)
+  object extraDestinations extends MongoListField[User, String](this)
+
+  def addDestination(address: String) {
+    User.update(("_id" -> this._id.is), ("$addToSet" ->("extraDestinations", address)))
+    log.info("Added alert destination '{}' to user: {}", address, shortName)
+  }
 
   def allWatchedSwimmers: List[Swimmer] = {
     for (swimmerId <- watching.value;
