@@ -6,7 +6,20 @@
 </head>
 <body class="lift:content_id=main">
 <div id="main" class="lift:surround?with=default;at=content">
+    <div class="lift:Destinations.listDestinations">
+        <h3>Current alert destinations</h3>
 
+        <div id="userEmail">User's email</div>
+        <div id="addressDisplay"><span id="address"></span><!--<input type="button" value="Remove"/>--></div>
+    </div>
+    <div class="lift:Destinations.addDestination?form=post">
+        <h4>Add an email address</h4>
+
+        <div>Email address:
+            <span id="emailToAdd">Last</span>
+            <input class="button" id="submit" type="submit" value="Add"/>
+        </div>
+    </div>
 </div>
 </body>
 </html>
