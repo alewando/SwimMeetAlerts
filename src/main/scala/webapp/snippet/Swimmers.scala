@@ -44,6 +44,8 @@ class Swimmers {
           }
           val sel = "#name" #> swimmer.name.is.fullName & "#submit" #> SHtml.submit("Watch", processWatch)
           sel & "#clearResults" #> SHtml.submit("Clear Results", clearResults)
+
+        // TODO: Add ability to add/remove an alias for the swimmer
       }
   }
 
