@@ -28,8 +28,10 @@ libraryDependencies ++= Seq(
     "net.databinder" %% "dispatch-http" % "0.8.8" excludeAll(
         ExclusionRule(organization="commons-logging")
     ),
+    "net.databinder" %% "dispatch-jsoup" % "0.8.8",
     "joda-time" % "joda-time" % "2.1",
     "org.joda" % "joda-convert" % "1.2",
+    "org.jsoup" % "jsoup" % "1.6.3",
     "javax.mail" % "mail" % "1.4.1",
     "org.mongodb" % "mongo-java-driver" % "2.7.3",
     "org.slf4j" % "slf4j-api" % "1.6.1",

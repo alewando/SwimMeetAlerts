@@ -4,6 +4,8 @@ import akka.actor.Actor
 import org.slf4j.LoggerFactory
 import scala.io.Source
 import model.CompletedEvent
+import dispatch.jsoup.JSoupHttp._
+import dispatch.{Http, url}
 
 
 class EventScraper extends Actor {
@@ -27,10 +29,16 @@ class EventScraper extends Actor {
     var completedCount = 0;
     var incompleteCount = 0;
     try {
-      // TODO: Use Dispatch client to get event page
-      val page = Source.fromURL(event.url)
+
+      // Retrieve page using Dispatch library, extract body using JSoup
+      val request = url(event.url)
+      val body = Http(request </> {
+        doc => doc.body().text()
+      })
+      val pageSource = Source.fromString(body)
+
       // Parse results
-      for (line <- page.getLines()) line match {
+      for (line <- pageSource.getLines()) line match {
         case ResultWithFinalTime(place, lastName, firstName, age, team, seed, finals) =>
           completedCount += 1
           val result = new ScrapedResult(event, new Person(firstName.trim, lastName.trim), age.toInt, team.trim, place, seed, finals)
