@@ -18,9 +18,13 @@ class Result private() extends MongoRecord[Result] with ObjectIdPk[Result] {
 
   object place extends StringField(this, 10)
 
-  object seedTime extends StringField(this, 50)
+  object seedTime extends StringField(this, 20)
 
-  object finalTime extends StringField(this, 50)
+  object finalTime extends StringField(this, 20)
+
+  object delta extends StringField(this, 20) {
+    override def optional_? = true
+  }
 
   def toShortHtml: NodeSeq = {
     <div class="result">

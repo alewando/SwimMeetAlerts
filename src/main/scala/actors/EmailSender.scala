@@ -66,7 +66,12 @@ class EmailSender extends Actor {
       result.event.is + "\n" +
       "Place: " + result.place.is + "\n" +
       "Seed time: " + result.seedTime.is + "\n" +
-      "Final time: " + result.finalTime.is + "\n";
+      "Final time: " + result.finalTime.is + "\n" + {
+      result.delta.valueBox map {
+        "Change: " + _ + "\n"
+      } openOr ""
+    };
+
 
     sendEmail(recipientAddresses, subject, body)
   }

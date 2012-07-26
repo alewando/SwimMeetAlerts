@@ -1,6 +1,9 @@
 package actors
 
 import model.{MeetUrl, Result}
+import net.liftweb.common.{Full, Empty}
+import org.joda.time.format.PeriodFormatterBuilder
+import org.joda.time.Period
 
 case class ScrapeAllMeets()
 
@@ -22,6 +25,27 @@ case class EventScraped(event: Event, completed: Boolean)
 
 case class ScrapedResult(event: Event, entrant: Person, age: Int, team: String, place: String, seedTime: String, finalTime: String) {
   def mapToRecord(): Result = {
-    Result.createRecord.meet(event.meetName).event(event.name).place(place).age(age).team(team).seedTime(seedTime).finalTime(finalTime)
+    //TODO: Move delta calculation to ResultProcessor
+    // Calculate time delta
+    val Time = """((\d+):)?(\d+).(\d+)""".r
+    def parse(ts: String) = ts match {
+      case Time(_, min, sec, ms) => Full(new Period(0, min.toInt, sec.toInt, ms.toInt).toStandardDuration)
+      case _ => Empty
+    }
+    val seed = parse(seedTime)
+    val fin = parse(finalTime)
+    val delta = (seed, fin) match {
+      case (Full(s), Full(f)) if f.compareTo(s) > 0 => Full(("+", f minus s))
+      case (Full(s), Full(f)) if f.compareTo(s) <= 0 => Full(("-", s minus f))
+      case _ => Empty
+    }
+    val fmt = new PeriodFormatterBuilder().printZeroNever().appendMinutes().appendSeparator(":").printZeroAlways().appendSeconds().appendSeparator(".").appendMillis().toFormatter
+
+    Result.createRecord.meet(event.meetName).event(event.name).place(place).age(age).team(team).seedTime(seedTime).finalTime(finalTime).delta(
+      delta match {
+        case Full((sign, diff)) => Full(sign + fmt.print(diff.toPeriod))
+        case _ => Empty
+      }
+    )
   }
 }
