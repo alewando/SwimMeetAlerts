@@ -10,8 +10,8 @@ import dispatch.{Http, url}
 
 class EventScraper extends Actor {
   val log = LoggerFactory.getLogger(this.getClass)
-  val ResultWithoutFinalTime = """\s*(\d+|-+)\s+(\w+), ([\w\s]+)\s+(\d+)\s+([\D]*)\s+(NT|NS|SCR|[0-9:.]+)\s*$""".r
-  val ResultWithFinalTime = """\s*(\d+|-+)\s+(\w+), ([\w\s]+)\s+(\d+)\s+([\D]*)\s+(NT|NS|SCR|[0-9:.]+)\s+(NT|NS|SCR|[0-9:.]+)\s*.*""".r
+  val ResultWithoutFinalTime = """\s*(\d+|-+)\s+(\w+), ([\w\s]+)\s+(\d+)\s+([\D]*)\s+(NT|NS|SCR|[0-9:.]+[YM]?)\s*$""".r
+  val ResultWithFinalTime = """\s*(\d+|-+)\s+(\w+), ([\w\s]+)\s+(\d+)\s+([\D]*)\s+(NT|NS|SCR|[0-9:.]+[YM]?)\s+(NT|NS|SCR|[0-9:.]+[YM]?)\s*.*""".r
   val RelayResultWithFinalTime = """\s*(\d+|-+)\s+(\D+)\s+(NT|NS|SCR|[0-9:.]+)\s+(NT|NS|SCR|[0-9:.]+)\s*.*""".r
 
   val resultProcessor = context.actorFor("/user/resultProcessor")
