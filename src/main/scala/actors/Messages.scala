@@ -29,7 +29,7 @@ case class ScrapedResult(event: Event, entrant: Person, age: Int, team: String, 
     // Calculate time delta
     val Time = """((\d+):)?(\d+).(\d+)""".r
     def parse(ts: String) = ts match {
-      case Time(_, min, sec, ms) => Full(new Period(0, min.toInt, sec.toInt, ms.toInt).toStandardDuration)
+      case Time(_, min, sec, ms) => Full(new Period(0, if (min != null) min.toInt else 0, sec.toInt, ms.toInt).toStandardDuration)
       case _ => Empty
     }
     val seed = parse(seedTime)
