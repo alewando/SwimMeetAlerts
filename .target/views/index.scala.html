@@ -1,0 +1,29 @@
+@(user: User)
+
+@swimmer(swimmer: Swimmer) = {
+<h3>@swimmer.fullName</h3>
+<table class="table table-bordered table-condensed">
+<thead><tr><th>Event</th><th>Meet</th><th>Time</th><th>Delta</th></tr></thead>
+<tbody>
+@swimmer.results.map { result =>
+    @result.delta.map { d => @defining(d match { 
+      case x if x.startsWith("+") => "success"
+      case x if x.startsWith("-") => "error"
+      case other => ""
+    }) { rowClass => <tr class="@rowClass"> }
+   }
+	<td>@result.event</td><td>@result.meet</td><td>@result.finalTime</td><td>@result.delta</td></tr> 
+}
+</tbody>
+</table>
+}
+
+@main {
+    <h1>Welcome @user.fullName</h1>
+    <br/>
+    <h2>Watching Swimmers:</h2>
+    @user.watching.map { swimmerId => @Swimmer.findById(swimmerId).map { s => @swimmer(s) }
+    }
+    <h2>Active meets</h2>
+    @Meet.inProgress.map { meet => <li><a href="@meet.eventIndexUrl">@meet.name</a></li> }
+}

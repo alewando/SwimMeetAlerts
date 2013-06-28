@@ -1,2 +1,0 @@
-web: target/start JettyLauncher
-
