@@ -10,3 +10,4 @@ SwimMeetAlerts.log*
 .DS_Store
 .idea/
 .idea_modules/
+.cache/
