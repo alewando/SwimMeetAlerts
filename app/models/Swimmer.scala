@@ -1,7 +1,6 @@
 package models
 
 import play.api.Play.current
-
 import com.mongodb.casbah.Imports._
 import com.novus.salat.dao.SalatDAO
 import com.novus.salat.dao.ModelCompanion
@@ -12,6 +11,7 @@ import com.mongodb.casbah.Imports._
 import se.radley.plugin.salat._
 import mongoContext._
 import play.Logger
+import actors.ScrapedResult
 
 case class Swimmer(
   id: ObjectId = new ObjectId,
@@ -22,6 +22,16 @@ case class Swimmer(
   def fullName: String = {
     name.firstName + " " + name.lastName;
   }
+
+  def resultExists_?(candidate: ScrapedResult): Boolean = {
+    Swimmer.findOne(MongoDBObject("results" -> ("$elemMatch" -> ("meet" -> candidate.event.meetName), ("event" -> candidate.event.name)))).isDefined
+  }
+
+  def addResult(result: EventResult) {
+    //val dbo = grater[EventResult].asDBObject(result)
+    Swimmer.update(MongoDBObject("_id" -> this.id), MongoDBObject("$push" -> ("results", result)), false, false)
+  }
+
 }
 
 object Swimmer extends ModelCompanion[Swimmer, ObjectId] {
@@ -59,12 +69,16 @@ object Swimmer extends ModelCompanion[Swimmer, ObjectId] {
     }
   }
 
+  def findForResult(result: ScrapedResult): Option[Swimmer] = {
+    findForName(result.entrant.fullName)
+  }
+
 }
 
 case class Name(firstName: String, lastName: String, searchName: String)
 
 case class EventResult(
-  id: ObjectId,
+  id: ObjectId = new ObjectId,
   meet: String,
   event: String,
   age: Int,

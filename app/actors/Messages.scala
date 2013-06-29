@@ -1,8 +1,9 @@
 package actors
 
-import models.{Meet, EventResult}
+import models.{ Meet, EventResult }
 import org.joda.time.format.PeriodFormatterBuilder
 import org.joda.time.Period
+import models.EventResult
 
 case class ScrapeAllMeets()
 
@@ -28,23 +29,21 @@ case class ScrapedResult(event: Event, entrant: Person, age: Int, team: String, 
     // Calculate time delta
     val Time = """((\d+):)?(\d+).(\d+)""".r
     def parse(ts: String) = ts match {
-      case Time(_, min, sec, ms) => Full(new Period(0, if (min != null) min.toInt else 0, sec.toInt, ms.toInt).toStandardDuration)
-      case _ => Empty
+      case Time(_, min, sec, ms) => Some(new Period(0, if (min != null) min.toInt else 0, sec.toInt, ms.toInt).toStandardDuration)
+      case _ => None
     }
     val seed = parse(seedTime)
     val fin = parse(finalTime)
     val delta = (seed, fin) match {
-      case (Full(s), Full(f)) if f.compareTo(s) > 0 => Full(("+", f minus s))
-      case (Full(s), Full(f)) if f.compareTo(s) <= 0 => Full(("-", s minus f))
-      case _ => Empty
+      case (Some(s), Some(f)) if f.compareTo(s) > 0 => Some(("+", f minus s))
+      case (Some(s), Some(f)) if f.compareTo(s) <= 0 => Some(("-", s minus f))
+      case _ => None
     }
     val fmt = new PeriodFormatterBuilder().printZeroNever().appendMinutes().appendSeparator(":").printZeroAlways().appendSeconds().appendSeparator(".").appendMillis().toFormatter
 
-    EventResult.createRecord.meet(event.meetName).event(event.name).place(place).age(age).team(team).seedTime(seedTime).finalTime(finalTime).delta(
-      delta match {
-        case Full((sign, diff)) => Full(sign + fmt.print(diff.toPeriod))
-        case _ => Empty
-      }
-    )
+    EventResult(meet = event.meetName, event = event.name, place = place, age = age, team = team, seedTime = seedTime, finalTime = finalTime, delta = delta match {
+      case Some((sign, diff)) => Some(sign + fmt.print(diff.toPeriod))
+      case _ => None
+    })
   }
 }

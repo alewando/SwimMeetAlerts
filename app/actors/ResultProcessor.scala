@@ -3,12 +3,12 @@ package actors
 import org.slf4j.LoggerFactory
 import models.{ User, Swimmer }
 import akka.actor.Actor
+import grizzled.slf4j.Logging
 
 /**
  * Processes a scraped record. Saves new results to DB and sends an email.
  */
-class ResultProcessor extends Actor {
-  val log = LoggerFactory.getLogger(getClass)
+class ResultProcessor extends Actor with Logging {
 
   val emailSender = context.actorFor("/user/emailSender")
 
@@ -18,26 +18,27 @@ class ResultProcessor extends Actor {
   }
 
   def handleResult(scrapedResult: ScrapedResult) {
-    log.trace("{}", scrapedResult);
+
+    trace(scrapedResult);
 
     // See if this scrapedResult is for a swimmer being watched
-    val swimmer = Swimmer.findForResult(scrapedResult) openOr {
+    val swimmer = Swimmer.findForResult(scrapedResult) getOrElse {
       //log.debug("Not a tracked swimmer: {}", scrapedResult.entrant)
       return
     }
-    log.debug("Result for tracked swimmer: " + scrapedResult)
+    debug("Result for tracked swimmer: " + scrapedResult)
 
     // Look for existing scrapedResult in DB
     if (!swimmer.resultExists_?(scrapedResult)) {
       // Create and save new scrapedResult record
-      log.info("Saving new scrapedResult for tracked swimmer: {}", scrapedResult)
+      info("Saving new scrapedResult for tracked swimmer: " + scrapedResult)
       val result = scrapedResult.mapToRecord()
       swimmer.addResult(result)
 
       // Get emails for swimmer's watchers
       val emailRecips: List[String] = getEmailRecipientsForSwimmer(swimmer) match {
         case Nil => {
-          log.info("Swimmer {} is being tracked, but has no follower email addresses", swimmer.name.value.fullName)
+          info("Swimmer " + swimmer.fullName + " is being tracked, but has no follower email addresses")
           return
         }
         case x => x
@@ -49,9 +50,9 @@ class ResultProcessor extends Actor {
   def getEmailRecipientsForSwimmer(swimmer: Swimmer): List[String] = {
     val recipLists = for (
       watcher <- swimmer.watchers;
-      u <- User.find(watcher)
+      u <- User.findOneById(watcher)
     ) yield {
-      u.email.value :: u.extraDestinations.value
+      u.email :: u.extraDestinations
     }
     recipLists.flatten
   }

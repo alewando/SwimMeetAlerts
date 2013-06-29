@@ -1,6 +1,6 @@
 package actors
 
-import webapp.Config._
+import app.Config._
 import javax.mail.internet.{ InternetAddress, MimeMessage }
 import org.slf4j.LoggerFactory
 import java.util.Properties
@@ -49,7 +49,7 @@ class EmailSender extends Actor with Logging {
       trans.close()
     } catch {
       case e =>
-        log.error("send failed, exception: " + e);
+        error("send failed, exception: " + e);
     }
 
   }

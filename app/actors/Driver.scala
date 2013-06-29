@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import models.Meet
 import java.util.Date
 import java.text.SimpleDateFormat
-import dispatch._
+import dispatch.classic._
 import grizzled.slf4j.Logging
 
 class Driver extends Actor with AdminNotifier with Logging {
@@ -63,7 +63,7 @@ class Driver extends Actor with AdminNotifier with Logging {
           headers.get("Last-Modified") match {
             case Some(vals) => dateParser.parse(vals.head)
             case _ =>
-              log.warn("URL {} has no Last-Modified header, using current date", idxUrl)
+              warn("URL " + idxUrl + " has no Last-Modified header, using current date")
               new Date()
           }
         }

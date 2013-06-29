@@ -12,9 +12,9 @@ object ApplicationBuild extends Build {
     "se.radley" %% "play-plugins-salat" % "1.2",
     "com.typesafe.akka" % "akka-actor" % "2.0",
     "com.typesafe.akka" % "akka-slf4j" % "2.0",
-    "net.databinder.dispatch" %% "dispatch-core" % "0.10.1" excludeAll (
+    "net.databinder" %% "dispatch-http" % "0.8.9" excludeAll (
       ExclusionRule(organization = "commons-logging")),
-    "net.databinder.dispatch" %% "dispatch-jsoup" % "0.10.1",
+    "net.databinder" %% "dispatch-jsoup" % "0.8.9",
     "joda-time" % "joda-time" % "2.1",
     "org.joda" % "joda-convert" % "1.2",
     "org.jsoup" % "jsoup" % "1.6.3",

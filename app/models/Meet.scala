@@ -11,7 +11,7 @@ import mongoContext._
 import play.Logger
 import grizzled.slf4j.Logging
 
-import dispatch._, Defaults._
+import dispatch.classic._
 
 case class Meet(
   @Key("_id") id: String,
@@ -29,7 +29,7 @@ case class Meet(
     // Look for an event index page
     try {
       val u = url(eventIndexUrl)
-      Http(u.HEAD)
+      Http(u >:> identity)
       debug("URL " + eventIndexUrl + " passes")
       true
     } catch {
@@ -44,20 +44,20 @@ case class Meet(
 
 object Meet extends ModelCompanion[Meet, String] {
   val dao = new SalatDAO[Meet, String](collection = mongoCollection("meeturls")) {}
-  
-    def inProgress: List[Meet] = {
-      dao.find(MongoDBObject("inProgress" -> true)).toList
+
+  def inProgress: List[Meet] = {
+    dao.find(MongoDBObject("inProgress" -> true)).toList
   }
 }
 
-case class CompletedEvent (
+case class CompletedEvent(
   id: ObjectId = new ObjectId,
   meetName: String,
   eventUrl: String) {
 }
 
 object CompletedEvent extends ModelCompanion[CompletedEvent, ObjectId] {
-    val dao = new SalatDAO[CompletedEvent, ObjectId](collection = mongoCollection("completedevents")) {}
+  val dao = new SalatDAO[CompletedEvent, ObjectId](collection = mongoCollection("completedevents")) {}
 
   def eventCompleted_?(meetName: String, eventUrl: String): Boolean = {
     dao.find(MongoDBObject("meetName" -> meetName, "eventUrl" -> eventUrl)).hasNext
@@ -70,7 +70,7 @@ object CompletedEvent extends ModelCompanion[CompletedEvent, ObjectId] {
   /**
    * Remove all CompletedEvent records for the specified meet
    */
-  def deleteEventsForMeet(meetName:String) {
-    dao.find(MongoDBObject("meetName" -> meetName)) map(CompletedEvent.remove(_))
-  }    
+  def deleteEventsForMeet(meetName: String) {
+    dao.find(MongoDBObject("meetName" -> meetName)) map (CompletedEvent.remove(_))
+  }
 }

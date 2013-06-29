@@ -17,20 +17,20 @@ case class User(
   firstName: String,
   lastName: String,
   superUser: Option[Boolean] = None,
-  watching: List[ObjectId]
-) {
+  watching: List[ObjectId],
+  extraDestinations: List[String]) {
   def fullName: String = {
     firstName + " " + lastName;
   }
 }
 
-case class Password( pwd: String, salt: String)
+case class Password(pwd: String, salt: String)
 
 object User extends ModelCompanion[User, ObjectId] {
   val dao = new SalatDAO[User, ObjectId](collection = mongoCollection("users")) {}
 
   def findOneByUsername(username: String): Option[User] = {
-    Logger.info("Searching for user "+ username);
+    Logger.info("Searching for user " + username);
     dao.findOne(MongoDBObject("email" -> username))
   }
 }

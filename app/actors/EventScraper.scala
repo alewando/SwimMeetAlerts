@@ -4,8 +4,8 @@ import akka.actor.Actor
 import org.slf4j.LoggerFactory
 import scala.io.Source
 import models.CompletedEvent
-import dispatch.jsoup.JSoupHttp._
-import dispatch.{ Http, url }
+import dispatch.classic.jsoup.JSoupHttp._
+import dispatch.classic.{ Http, url }
 import grizzled.slf4j.Logging
 
 class EventScraper extends Actor with Logging {
