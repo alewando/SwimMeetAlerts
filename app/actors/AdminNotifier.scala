@@ -1,7 +1,8 @@
 package actors
 
-import app.Actors
 import org.slf4j.LoggerFactory
+import play.api.Play.current
+import play.api.libs.concurrent.Akka
 
 /**
  * Trait for sending notifications to the system admin
@@ -9,7 +10,7 @@ import org.slf4j.LoggerFactory
 
 trait AdminNotifier {
 
-  val adminNotifier = Actors.get.actorFor("/user/emailSender")
+  val adminNotifier = Akka.system.actorFor("/user/emailSender")
 
   def sendAdminEmail(subject: String, message: String) {
     LoggerFactory.getLogger(this.getClass).info("Sending admin email: {}", subject)

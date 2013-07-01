@@ -10,8 +10,6 @@ object ApplicationBuild extends Build {
   val appDependencies = Seq(
     // Add your project dependencies here,
     "se.radley" %% "play-plugins-salat" % "1.2",
-    "com.typesafe.akka" % "akka-actor" % "2.0",
-    "com.typesafe.akka" % "akka-slf4j" % "2.0",
     "net.databinder" %% "dispatch-http" % "0.8.9" excludeAll (
       ExclusionRule(organization = "commons-logging")),
     "net.databinder" %% "dispatch-jsoup" % "0.8.9",
