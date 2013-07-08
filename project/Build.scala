@@ -9,6 +9,8 @@ object ApplicationBuild extends Build {
 
   val appDependencies = Seq(
     // Add your project dependencies here,
+    "jp.t2v" %% "play2.auth"      % "0.9",
+    "org.mindrot" % "jbcrypt" % "0.3m",
     "se.radley" %% "play-plugins-salat" % "1.2",
     "net.databinder" %% "dispatch-http" % "0.8.9" excludeAll (
       ExclusionRule(organization = "commons-logging")),

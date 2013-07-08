@@ -9,11 +9,13 @@ import com.mongodb.casbah.Imports._
 import se.radley.plugin.salat._
 import mongoContext._
 import play.Logger
+import org.mindrot.jbcrypt.BCrypt
+import grizzled.slf4j.Logging
 
 case class User(
   id: ObjectId = new ObjectId,
   email: String,
-  password: Password,
+  pw: String,
   firstName: String,
   lastName: String,
   superUser: Option[Boolean] = None,
@@ -24,13 +26,21 @@ case class User(
   }
 }
 
-case class Password(pwd: String, salt: String)
-
-object User extends ModelCompanion[User, ObjectId] {
+object User extends ModelCompanion[User, ObjectId] with Logging {
   val dao = new SalatDAO[User, ObjectId](collection = mongoCollection("users")) {}
 
   def findOneByUsername(username: String): Option[User] = {
-    Logger.info("Searching for user " + username);
     dao.findOne(MongoDBObject("email" -> username))
   }
+
+  def authenticate(username: String, password: String): Option[User] = {
+    findOneByUsername(username).filter { account => BCrypt.checkpw(password, account.pw)
+    }
+  }
+
+  def create(user: User) {
+    //import account._
+    val pass = BCrypt.hashpw(user.pw, BCrypt.gensalt())
+  }
+
 }
