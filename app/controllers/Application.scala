@@ -5,9 +5,11 @@ import play.api.mvc._
 import jp.t2v.lab.play2.auth.AuthElement
 import auth.AuthenticationConfig
 import auth.NormalUser
+import views._
 
 object Application extends Controller with AuthElement with AuthenticationConfig {
 
-  def index = StackAction(AuthorityKey -> NormalUser) { implicit request => Ok(views.html.index(loggedIn)) };
+  def index = StackAction(AuthorityKey -> NormalUser) { implicit request => Ok(html.index(loggedIn)) };
 
+  def meetlist = Action { implicit request => Ok(html.meetList()) }
 }

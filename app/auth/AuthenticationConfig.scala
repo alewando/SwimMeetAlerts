@@ -57,12 +57,12 @@ trait AuthenticationConfig extends AuthConfig with Logging {
   /**
    * Where to redirect the user after logging out
    */
-  def logoutSucceeded(request: RequestHeader): Result = Redirect(routes.Auth.login)
+  def logoutSucceeded(request: RequestHeader): Result = Redirect(routes.Application.meetlist)
 
   /**
    * If the user is not logged in and tries to access a protected resource then redirct them as follows:
    */
-  def authenticationFailed(request: RequestHeader): Result = Redirect(routes.Auth.login)
+  def authenticationFailed(request: RequestHeader): Result = Redirect(routes.Application.meetlist)
 
   /**
    * If authorization failed (usually incorrect password) redirect the user as follows:

@@ -1,0 +1,14 @@
+@(sform: Form[SignupInfo])
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@main {
+            @helper.form(routes.Signup.submit) {
+            @helper.inputText(sform("first"), 'size -> 30)          
+            @helper.inputText(sform("last"), 'size -> 30)
+            @helper.inputText(sform("email"), 'size -> 60)          
+            @helper.inputPassword(sform("password"))          
+            <button type="submit" class="btn">Sign up</button>
+            }
+}

@@ -9,7 +9,13 @@ GET     /                           controllers.Application.index
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Authentication
-GET     /login                       controllers.Auth.login
+#GET     /login                      controllers.Auth.login
 POST    /login                      controllers.Auth.authenticate
 GET     /logout                     controllers.Auth.logout
   
+# Sign-up
+GET		/signup                     controllers.Signup.form
+POST    /signup                     controllers.Signup.submit
+
+# Meet list
+GET     /meetList                   controllers.Application.meetlist

@@ -19,8 +19,8 @@ case class User(
   firstName: String,
   lastName: String,
   superUser: Option[Boolean] = None,
-  watching: List[ObjectId],
-  extraDestinations: List[String]) {
+  watching: List[ObjectId] = Nil,
+  extraDestinations: List[String] = Nil) {
   def fullName: String = {
     firstName + " " + lastName;
   }
@@ -34,13 +34,13 @@ object User extends ModelCompanion[User, ObjectId] with Logging {
   }
 
   def authenticate(username: String, password: String): Option[User] = {
-    findOneByUsername(username).filter { account => BCrypt.checkpw(password, account.pw)
-    }
+    findOneByUsername(username) filter { account => BCrypt.checkpw(password, account.pw) }
   }
 
-  def create(user: User) {
+  def create(firstName: String, lastName: String, email: String, pw: String) {
     //import account._
-    val pass = BCrypt.hashpw(user.pw, BCrypt.gensalt())
+    val pass = BCrypt.hashpw(pw, BCrypt.gensalt())
+    dao.save(new User(firstName = firstName, lastName = lastName, email = email, pw = pass))
   }
 
 }

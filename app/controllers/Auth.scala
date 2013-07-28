@@ -18,13 +18,14 @@ object Auth extends Controller with Logging with LoginLogout with auth.Authentic
       .verifying("Invalid email or password", result => result.isDefined)
   }
 
-  def login = Action { implicit request =>
-    Ok(html.login(loginForm))
-  }
+  //  def login = Action { implicit request =>
+  //    Ok(html.login(loginForm))
+  //  }
 
   def authenticate = Action { implicit request =>
     loginForm.bindFromRequest.fold(
-      formWithErrors => BadRequest(html.login(formWithErrors)),
+      //formWithErrors => BadRequest(html.login(formWithErrors)),
+      formWithErrors => BadRequest(html.meetList()),
       user => gotoLoginSucceeded(user.get.email))
   }
 
