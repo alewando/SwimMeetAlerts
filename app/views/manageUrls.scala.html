@@ -1,0 +1,17 @@
+@(addForm : Form[NewMeetUrl], user : Option[User] = None)
+@import controllers._
+@import helper._
+@import helper.twitterBootstrap._
+
+@main user {
+
+@Meet.findAll.map { meet =>
+ @meet.name = @meet.id<br/>
+}
+
+@helper.form(routes.ManageUrls.add) {
+  @helper.inputText(addForm("url"), 'size -> 200, '_label -> "Meet URL")
+  <button type="submit" class="btn">Add</button>          
+}
+
+}

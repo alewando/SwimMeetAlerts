@@ -27,7 +27,7 @@ class Driver extends Actor with AdminNotifier with Logging {
     var count = 0;
     for (url <- Meet.findAll) {
       val lastMod = getLastModified(url)
-      debug("Last modified date for URL " + url.id + " is " + lastMod)
+      debug("Last modified date for URL " + url.id + " is " + lastMod + ". Last completed: " + url.lastCompleted)
       if (url.inProgress) {
         // Mark as complete if we've been scraping for 2 weeks without completion
         if (lastMod.compareTo(twoWeeksAgo) < 0) {
@@ -40,7 +40,7 @@ class Driver extends Actor with AdminNotifier with Logging {
           self ! ScrapeMeet(url)
           count += 1
         }
-      } else if (lastMod.compareTo(url.lastCompleted getOrElse new Date(0)) > 0) {
+      } else if (lastMod.compareTo(url.lastCompleted getOrElse new Date(1)) > 0) {
         // Completed date is older than the last modified date, this URL is active again
         info("Meet " + url.id + " has become active")
         Meet.save(url.copy(inProgress = true))

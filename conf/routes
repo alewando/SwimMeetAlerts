@@ -3,19 +3,23 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
+GET    /               controllers.Application.index
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET    /assets/*file   controllers.Assets.at(path="/public", file)
 
 # Authentication
 #GET     /login                      controllers.Auth.login
-POST    /login                      controllers.Auth.authenticate
-GET     /logout                     controllers.Auth.logout
+POST   /login          controllers.Auth.authenticate
+GET    /logout         controllers.Auth.logout
   
 # Sign-up
-GET		/signup                     controllers.Signup.form
-POST    /signup                     controllers.Signup.submit
+GET    /signup         controllers.Signup.form
+POST   /signup         controllers.Signup.submit
 
 # Meet list
-GET     /meetList                   controllers.Application.meetlist
+GET    /meetList       controllers.Application.meetlist
+
+# Manage URLS
+GET    /manageUrls     controllers.ManageUrls.form
+POST   /addUrls        controllers.ManageUrls.add
