@@ -16,7 +16,7 @@ import dispatch.classic._
 case class Meet(
   @Key("_id") id: String,
   name: String,
-  inProgress: Boolean,
+  inProgress: Boolean = false,
   lastCompleted: Option[Date] = Some(new Date)) extends Logging {
   def eventIndexPage = "evtindex.htm"
 
@@ -39,7 +39,6 @@ case class Meet(
       }
     }
   }
-
 }
 
 object Meet extends ModelCompanion[Meet, String] {
