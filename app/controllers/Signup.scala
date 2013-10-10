@@ -13,7 +13,7 @@ case class SignupInfo(first: String, last: String, email: String, password: Stri
 object Signup extends Controller with Logging {
 
   val signupForm: Form[SignupInfo] = Form {
-    mapping("first" -> text, "last" -> text, "email" -> text, "password" -> text)(SignupInfo.apply)(SignupInfo.unapply)
+    mapping("first" -> text, "last" -> text, "email" -> email, "password" -> text)(SignupInfo.apply)(SignupInfo.unapply)
   }
 
   def form = Action { implicit request =>
