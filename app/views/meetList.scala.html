@@ -1,5 +1,11 @@
+@import helper._
+@import helper.twitterBootstrap._
 
-@main {
+@main(None){
 
-This is the meet list
+<h1>Active meets</h1>
+@Meet.inProgress.map { activeMeet =>
+ <div><a href"@activeMeet.id">@activeMeet.name</a></div>
+}
+
 }

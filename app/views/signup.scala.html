@@ -3,12 +3,12 @@
 @import helper._
 @import helper.twitterBootstrap._
 
-@main {
+@main(None){
             @helper.form(routes.Signup.submit) {
-            @helper.inputText(sform("first"), 'size -> 30)          
-            @helper.inputText(sform("last"), 'size -> 30)
-            @helper.inputText(sform("email"), 'size -> 60)          
-            @helper.inputPassword(sform("password"))          
+            @helper.inputText(sform("first"), 'size -> 30, '_label -> "First Name")          
+            @helper.inputText(sform("last"), 'size -> 30, '_label -> "Last Name")
+            @helper.inputText(sform("email"), 'size -> 60, '_label -> "Email Address", '_help -> "")          
+            @helper.inputPassword(sform("password"), '_label -> "Password")          
             <button type="submit" class="btn">Sign up</button>
             }
 }

@@ -1,5 +1,4 @@
-@(content: Html)
-
+@(user:Option[User] = None)(content: Html)	
 
 <!DOCTYPE html>
 <html lang="en">
@@ -56,14 +55,21 @@
               </li>
             </ul>
  -->
-			<div class="navbar-form pull-right">            
-            @helper.form(routes.Auth.authenticate, 'class -> "") {          
-              <input class="span2" type="text" name="email" placeholder="Email" value="">
-              <input class="span2" type="password" name="password" placeholder="Password">
-              <button type="submit" class="btn">Sign in</button>
+			<span class="navbar-form pull-right">
+			@user match {
+				case Some(user) => {
+				     <a href="@routes.Auth.logout">Sign Out</a>
+				} 
+				case None => {            
+                   @helper.form(routes.Auth.authenticate, 'class -> "") {          
+                      <input class="span2" type="text" name="email" placeholder="Email" value="">
+                      <input class="span2" type="password" name="password" placeholder="Password">
+                      <button type="submit" class="btn">Sign in</button>
+                      <a href="@routes.Signup.form">Sign Up</a>
+                    }
+                }
             }
-            </div>
-            <a href="@routes.Signup.form">Sign Up</a>
+            </span>
           </div><!--/.nav-collapse -->
         </div>
       </div>
