@@ -23,3 +23,4 @@ GET    /meetList       controllers.Application.meetlist
 # Manage URLS
 GET    /manageUrls     controllers.ManageUrls.form
 POST   /addUrls        controllers.ManageUrls.add
+GET    /scrape     controllers.ManageUrls.scrape(url)  
