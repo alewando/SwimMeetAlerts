@@ -28,8 +28,8 @@ case class Swimmer(
   }
 
   def addResult(result: EventResult) {
-    //val dbo = grater[EventResult].asDBObject(result)
-    Swimmer.update(MongoDBObject("_id" -> this.id), MongoDBObject("$push" -> ("results", result)), false, false)
+    val resultDbo = grater[EventResult].asDBObject(result)
+    Swimmer.update(MongoDBObject("_id" -> this.id), MongoDBObject("$push" -> MongoDBObject("results" -> resultDbo)), false, false, WriteConcern.Safe)
   }
 
 }
