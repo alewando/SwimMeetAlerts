@@ -7,6 +7,9 @@ GET    /               controllers.Application.index
 
 # Map static resources from the /public folder to the /assets URL path
 GET    /assets/*file   controllers.Assets.at(path="/public", file)
+#GET    /assets/img/glyphicons-halflings-white.png      controllers.Assets.at(path="/public", file="images/glyphicons-halflings-white.png")
+#GET    /assets/img/glyphicons-halflings.png            controllers.Assets.at(path="/public", file="images/glyphicons-halflings.png")
+#GET    /assets/img/glyphicons-halflings.png            controllers.Assets.at(path="/public", file="/glyphicons-halflings.png")
 
 # Authentication
 #GET     /login                      controllers.Auth.login
@@ -23,4 +26,6 @@ GET    /meetList       controllers.Application.meetlist
 # Manage URLS
 GET    /manageUrls     controllers.ManageUrls.form
 POST   /addUrls        controllers.ManageUrls.add
-GET    /scrape     controllers.ManageUrls.scrape(url)  
+GET    /scrape         controllers.ManageUrls.scrape(url) 
+GET    /removeUrl      controllers.ManageUrls.removeUrl(url) 
+GET    /scrapeAll      controllers.ManageUrls.scrapeAll 
