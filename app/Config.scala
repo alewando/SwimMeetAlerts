@@ -2,7 +2,6 @@ package app
 
 import play.api.Play
 import akka.actor.ActorSystem
-import grizzled.slf4j.Logging
 import akka.actor.Props
 import actors.ResultProcessor
 import actors.EmailSender
@@ -15,5 +14,5 @@ object Config {
   def SMTP_PASSWORD = Play.current.configuration.getString("sendgrid.password") getOrElse ""
   def SMTP_SERVER = Play.current.configuration.getString("smtp.server") getOrElse ""
   def EMAIL_FROM_ADDRESS = Play.current.configuration.getString("email.from.address") getOrElse "alert@swimmeetalerts.com"
-  def ADMIN_EMAIL = Play.current.configuration.getString("admin.email") getOrElse ""
+  def ADMIN_EMAIL = Play.current.configuration.getString("admin.email") getOrElse "adam@alewando.com"
 }
