@@ -9,15 +9,14 @@ import com.mongodb.casbah.Imports._
 import se.radley.plugin.salat._
 import mongoContext._
 import play.Logger
-import grizzled.slf4j.Logging
-
 import dispatch.classic._
+import com.typesafe.scalalogging.slf4j.Logging
 
 case class Meet(
   @Key("_id") id: String,
   name: String,
   inProgress: Boolean = false,
-  lastCompleted: Option[Date] = Some(new Date)) extends Logging {
+  lastCompleted: Option[Date]) extends Logging {
   def eventIndexPage = "evtindex.htm"
 
   def eventIndexUrl = id match {
@@ -30,11 +29,11 @@ case class Meet(
     try {
       val u = url(eventIndexUrl)
       Http(u >:> identity)
-      debug("URL " + eventIndexUrl + " passes")
+      logger.debug(s"URL ${eventIndexUrl} passes")
       true
     } catch {
-      case _ => {
-        info("Not a valid meet URL: " + eventIndexUrl)
+      case _: Throwable => {
+        logger.info(s"Not a valid meet URL: ${eventIndexUrl}")
         false
       }
     }

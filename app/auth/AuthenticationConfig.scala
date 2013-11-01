@@ -6,7 +6,7 @@ import play.api.mvc._
 import play.api.mvc.Results._
 import models.User
 import controllers.routes
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 trait AuthenticationConfig extends AuthConfig with Logging {
 
@@ -73,12 +73,15 @@ trait AuthenticationConfig extends AuthConfig with Logging {
    * A function that determines what `Authority` a user has.
    * You should alter this procedure to suit your application.
    */
-  def authorize(user: User, authority: Authority): Boolean =
-    authority match {
+  def authorize(user: User, authority: Authority): Boolean = {
+    val pass = authority match {
       case Administrator => user.superUser getOrElse false
       case NormalUser => true
       case _ => false
     }
+    logger.trace(s"Auth check: Does ${user.email} have ${authority}: ${pass}")
+    pass
+  }
 
   /**
    * Whether use the secure option or not use it in the cookie.

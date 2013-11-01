@@ -10,7 +10,7 @@ import se.radley.plugin.salat._
 import mongoContext._
 import play.Logger
 import org.mindrot.jbcrypt.BCrypt
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 case class User(
   id: ObjectId = new ObjectId,

@@ -15,5 +15,5 @@
     <logger name="actors" level="DEBUG"/>
     <logger name="models" level="DEBUG"/>
     <logger name="akka" level="DEBUG"/>
-
+    <logger name="com.novus" level="DEBUG"/>
 </configuration>

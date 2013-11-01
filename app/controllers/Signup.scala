@@ -6,7 +6,7 @@ import play.api.data._
 import play.api.data.Forms._
 import views._
 import models._
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 case class SignupInfo(first: String, last: String, email: String, password: String)
 

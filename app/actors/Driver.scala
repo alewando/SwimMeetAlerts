@@ -8,7 +8,7 @@ import models.Meet
 import java.util.Date
 import java.text.SimpleDateFormat
 import dispatch.classic._
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 class Driver extends Actor with AdminNotifier with Logging {
   val MAX_WAIT = 60000
@@ -21,53 +21,61 @@ class Driver extends Actor with AdminNotifier with Logging {
   }
 
   def scrapeAll = {
-    info("Processing all registered meet URLs")
+    logger.info("Processing all registered meet URLs")
     // Check all of the registered meet URLs
     val twoWeeksAgo = DateTime.now.minusWeeks(2).toDate
     var count = 0;
     for (url <- Meet.findAll) {
       val lastMod = getLastModified(url)
-      debug("Last modified date for URL " + url.id + " is " + lastMod + ". Last completed: " + url.lastCompleted)
+      logger.debug(s"Last modified date for URL ${url.id} is ${lastMod}. Last completed: ${url.lastCompleted}")
       if (url.inProgress) {
         // Mark as complete if we've been scraping for 2 weeks without completion
         if (lastMod.compareTo(twoWeeksAgo) < 0) {
-          warn("Meet" + url.id + " has been in progress for two weeks, marking as complete")
+          logger.warn(s"Meet ${url.id} has been in progress for two weeks, marking as complete")
           sendAdminEmail("Meet expiration notice", "Meet has not completed for two weeks, marking complete: %s".format(url.id))
           Meet.save(url.copy(inProgress = false, lastCompleted = Some(new Date)))
         } else {
           // Otherwise, scrape the meet for latest results
-          debug("Scraping in-progress meet: " + url.id)
+          logger.debug(s"Scraping in-progress meet: ${url.id}")
           self ! ScrapeMeet(url)
           count += 1
         }
       } else if (lastMod.compareTo(url.lastCompleted getOrElse new Date(1)) > 0) {
         // Completed date is older than the last modified date, this URL is active again
-        info("Meet " + url.id + " has become active")
-        Meet.save(url.copy(inProgress = true))
+        logger.info(s"Meet ${url.id} has become active")
+        val inProgressMeet = url.copy(inProgress = true)
+        Meet.save(inProgressMeet)
         sendAdminEmail("Meet activation notice", "Meet URL has become active: %s".format(url.id))
-        self ! ScrapeMeet(url)
+        self ! ScrapeMeet(inProgressMeet)
         count += 1
       }
     }
-    if (count == 0) info("No active meets")
+    if (count == 0) logger.info("No active meets")
   }
 
   def getLastModified(meetUrl: Meet): Date = {
     val dateParser = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z")
     val idxUrl = meetUrl.id + "/evtindex.htm"
     val u = url(idxUrl)
-    debug("Executing HEAD request for " + idxUrl)
-    Http(u.HEAD >:> {
-      headers: Map[String, Set[String]] =>
-        {
-          headers.get("Last-Modified") match {
-            case Some(vals) => dateParser.parse(vals.head)
-            case _ =>
-              warn("URL " + idxUrl + " has no Last-Modified header, using current date")
-              new Date()
+    logger.debug(s"Executing HEAD request for ${idxUrl}")
+    try {
+      Http(u.HEAD >:> {
+        headers: Map[String, Set[String]] =>
+          {
+            headers.get("Last-Modified") match {
+              case Some(vals) => dateParser.parse(vals.head)
+              case _ =>
+                logger.warn(s"URL ${idxUrl} has no Last-Modified header, using current date")
+                new Date()
+            }
           }
-        }
-    })
+      })
+    } catch {
+      case ex: Throwable => {
+        logger.error(s"Error retrieving headers for ${meetUrl}", ex)
+        new Date()
+      }
+    }
   }
 
 }

@@ -6,7 +6,7 @@ import scala.io.Source
 import models.CompletedEvent
 import dispatch.classic.jsoup.JSoupHttp._
 import dispatch.classic.{ Http, url }
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 class EventScraper extends Actor with Logging {
   //val log = LoggerFactory.getLogger(this.getClass)
@@ -25,7 +25,7 @@ class EventScraper extends Actor with Logging {
    * Scrape results from a specific event
    */
   def scrapeEvent(event: Event) {
-    debug("Scraping event " + event.id + " for meet " + event.meetName)
+    logger.debug(s"Scraping event ${event.id} for meet ${event.meetName}")
     var completedCount = 0;
     var incompleteCount = 0;
     try {
@@ -42,22 +42,24 @@ class EventScraper extends Actor with Logging {
         case ResultWithFinalTime(place, lastName, firstName, age, team, seed, finals) =>
           completedCount += 1
           val result = new ScrapedResult(event, new Person(firstName.trim, lastName.trim), age.toInt, team.trim, place, seed, finals)
+          //logger.debug(s"result with time for event ${event.id}: ${result}")
           resultProcessor ! result
         case RelayResultWithFinalTime(place, team, seed, finals) =>
           // We don't do anything with relay results but need to find the completed
           // results so that the event can be marked as complete
+          //logger.debug(s"relay result with time for event ${event.id}: ${place}, ${team}, ${seed}, ${finals}")
           completedCount += 1
         case ResultWithoutFinalTime(place, lastName, firstName, age, team, seed) =>
           // Note this pattern also matches any 'Preliminary' results included on the Finals event page
           incompleteCount += 1
-        case line => trace("Unmatched line: " + line)
+        case line => logger.trace(s"Unmatched line: ${line}")
       }
     } catch {
-      case e: Exception => error("Error scraping event " + event.id + ": " + e)
+      case e: Exception => logger.error("Error scraping event " + event.id, e)
     }
     val eventCompleted = completedCount > 0
     if (eventCompleted) CompletedEvent.markEventComplete(event.meetName, event.url)
-    debug("Done scraping event " + event.id + ", " + completedCount + " with final times, " + incompleteCount + " without")
+    logger.debug(s"Done scraping event ${event.id}, ${completedCount} with final times, ${incompleteCount} without")
     sender ! EventScraped(event, eventCompleted)
   }
 }

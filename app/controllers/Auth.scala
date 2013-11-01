@@ -7,7 +7,7 @@ import play.api.data.Forms._
 import views._
 import models._
 import jp.t2v.lab.play2.auth.LoginLogout
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 object Auth extends Controller with Logging with LoginLogout with auth.AuthenticationConfig {
 

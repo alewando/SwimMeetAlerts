@@ -11,7 +11,7 @@ object ApplicationBuild extends Build {
     // Add your project dependencies here,
     "jp.t2v" %% "play2.auth"      % "0.9",
     "org.mindrot" % "jbcrypt" % "0.3m",
-    "se.radley" %% "play-plugins-salat" % "1.2",
+    "se.radley" %% "play-plugins-salat" % "1.3.0",
     "net.databinder" %% "dispatch-http" % "0.8.9" excludeAll (
       ExclusionRule(organization = "commons-logging")),
     "net.databinder" %% "dispatch-jsoup" % "0.8.9",
@@ -22,7 +22,7 @@ object ApplicationBuild extends Build {
     "org.mongodb" % "mongo-java-driver" % "2.7.3",
     "org.slf4j" % "slf4j-api" % "1.6.1",
     "org.slf4j" % "jcl-over-slf4j" % "1.6.1",
-    "org.clapper" % "grizzled-slf4j_2.10" % "1.0.1",
+    "com.typesafe" %% "scalalogging-slf4j" % "1.0.1",
     "ch.qos.logback" % "logback-classic" % "0.9.26",
     "org.scala-tools.testing" %% "specs" % "1.6.9" % "test",
     "junit" % "junit" % "4.7" % "test")
@@ -32,4 +32,5 @@ object ApplicationBuild extends Build {
     routesImport += "se.radley.plugin.salat.Binders._",
     templatesImport += "org.bson.types.ObjectId",
     resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots")
+    .settings(net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 }

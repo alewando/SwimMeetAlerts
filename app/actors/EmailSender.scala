@@ -7,7 +7,7 @@ import java.util.Properties
 import javax.mail._
 import akka.actor.Actor
 import models.{ Swimmer, EventResult }
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 class EmailSender extends Actor with Logging {
 
@@ -19,10 +19,10 @@ class EmailSender extends Actor with Logging {
   val session = Session.getInstance(props, null);
 
   def receive = {
-    case (swimmer: Swimmer, result: EventResult, recipients: List[String]) =>
-      sendResultEmail(swimmer, result, recipients)
+    case (swimmer: Swimmer, result: EventResult, recipients: List[_]) =>
+      sendResultEmail(swimmer, result, recipients.asInstanceOf[List[String]])
     case AdminMessage(subject, message) => {
-      info("Sending admin email w/ subject '" + subject + "'")
+      logger.info(s"Sending admin email (${ADMIN_EMAIL}) w/ subject '${subject}'")
       sendEmail(ADMIN_EMAIL :: Nil, subject, message)
     }
   }
@@ -48,14 +48,14 @@ class EmailSender extends Actor with Logging {
       trans.sendMessage(message, message.getAllRecipients())
       trans.close()
     } catch {
-      case e =>
-        error("send failed, exception: " + e);
+      case e: Throwable =>
+        logger.error("send failed", e);
     }
 
   }
 
   def sendResultEmail(swimmer: Swimmer, result: EventResult, recipientAddresses: List[String]) {
-    info("Sending email to {} for result {}", recipientAddresses, result)
+    logger.info(s"Sending email to ${recipientAddresses} for result ${result}")
 
     // TODO: Calculate delta between seed and final times (use joda Period to parse, convert to Duration for calc)
 
