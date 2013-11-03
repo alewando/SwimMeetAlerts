@@ -1,11 +1,4 @@
-@import helper._
-@import helper.twitterBootstrap._
 
-@main(None){
-
-<h1>Active meets</h1>
-@Meet.inProgress.map { activeMeet =>
- <div><a href"@activeMeet.id">@activeMeet.name</a></div>
-}
-
-}
+@main(None) { 
+	@activeMeets()
+}     

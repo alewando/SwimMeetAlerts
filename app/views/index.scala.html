@@ -7,8 +7,8 @@
 <tbody>
 @swimmer.results.map { result =>
     @result.delta.map { d => @defining(d match { 
-      case x if x.startsWith("+") => "success"
-      case x if x.startsWith("-") => "error"
+      case x if x.startsWith("+") => "error"
+      case x if x.startsWith("-") => "success"
       case other => ""
     }) { rowClass => <tr class="@rowClass"> }
    }
@@ -22,11 +22,8 @@
     <h1>Welcome @user.fullName</h1>
     <br/>
     <h2>Watching Swimmers:</h2>
-    @user.watching.map { swimmerId => @Swimmer.findById(swimmerId).map { s => @swimmer(s) }
-    }
-    <h2>Active meets</h2>
-    <ul>
-    @Meet.inProgress.map { meet => <li><a href="@meet.eventIndexUrl">@meet.name</a></li> }
-    </ul>
+    @user.watching.map { swimmerId => @Swimmer.findById(swimmerId).map { s => @swimmer(s) }}
+    
+    @meetList()
 }
 	

@@ -1,0 +1,12 @@
+
+
+    @defining(Meet.inProgress) { currentMeets =>
+    @if(!currentMeets.isEmpty){
+	    <h2>Active meets</h2>
+	    <ul>
+	    @currentMeets.map { meet => <li><a href="@meet.eventIndexUrl">@meet.name</a></li> }
+	    </ul>
+	    } else {
+	    <h3>No active meets.</h3>
+	    }
+    }
