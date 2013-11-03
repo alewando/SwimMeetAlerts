@@ -1,9 +1,9 @@
-@(addForm : Form[NewMeetUrl], user : Option[User] = None)
+@(addForm : Form[NewMeetUrl])(implicit user : User)
 @import controllers._
 @import helper._
 @import helper.twitterBootstrap._
 
-@main(user) {
+@main(Some(user)) {
 
 <h2>URLs</h2>
 <table class="table">

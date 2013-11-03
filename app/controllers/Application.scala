@@ -9,7 +9,7 @@ import views._
 
 object Application extends Controller with AuthElement with AuthenticationConfig {
 
-  def index = StackAction(AuthorityKey -> NormalUser) { implicit request => Ok(html.index(loggedIn)) };
+  def index = StackAction(AuthorityKey -> NormalUser) { implicit request => Ok(html.index()) };
 
   def meetlist = Action { implicit request => Ok(html.meetList()) }
 }
