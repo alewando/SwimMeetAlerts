@@ -9,6 +9,7 @@ import java.util.Date
 import java.text.SimpleDateFormat
 import dispatch.classic._
 import com.typesafe.scalalogging.slf4j.Logging
+import com.mongodb.casbah.WriteConcern
 
 class Driver extends Actor with AdminNotifier with Logging {
   val MAX_WAIT = 60000
@@ -33,7 +34,7 @@ class Driver extends Actor with AdminNotifier with Logging {
         if (lastMod.compareTo(twoWeeksAgo) < 0) {
           logger.warn(s"Meet ${url.id} has been in progress for two weeks, marking as complete")
           sendAdminEmail("Meet expiration notice", "Meet has not completed for two weeks, marking complete: %s".format(url.id))
-          Meet.save(url.copy(inProgress = false, lastCompleted = Some(new Date)))
+          Meet.save(url.copy(inProgress = false, lastCompleted = Some(new Date)), WriteConcern.Safe)
         } else {
           // Otherwise, scrape the meet for latest results
           logger.debug(s"Scraping in-progress meet: ${url.id}")
