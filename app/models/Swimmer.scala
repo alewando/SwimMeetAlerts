@@ -12,13 +12,15 @@ import se.radley.plugin.salat._
 import mongoContext._
 import play.Logger
 import actors.ScrapedResult
+import com.typesafe.scalalogging.slf4j.Logging
 
 case class Swimmer(
   id: ObjectId = new ObjectId,
   name: Name,
-  watchers: List[ObjectId],
-  results: List[EventResult],
-  aliasFor: Option[ObjectId]) {
+  watchers: List[ObjectId] = Nil,
+  results: List[EventResult] = Nil,
+  aliasFor: Option[ObjectId] = None) {
+
   def fullName: String = {
     name.firstName + " " + name.lastName;
   }
@@ -30,6 +32,11 @@ case class Swimmer(
   def addResult(result: EventResult) {
     val resultDbo = grater[EventResult].asDBObject(result)
     Swimmer.update(MongoDBObject("_id" -> this.id), MongoDBObject("$push" -> MongoDBObject("results" -> resultDbo)), false, false, WriteConcern.Safe)
+  }
+
+  def addWatcher(user: User) {
+    Swimmer.update(MongoDBObject("_id" -> this.id), MongoDBObject("$addToSet" -> MongoDBObject("watchers" -> user.id)), false, false, WriteConcern.Safe)
+    User.update(MongoDBObject("_id" -> user.id), MongoDBObject("$addToSet" -> MongoDBObject("watching" -> this.id)), false, false, WriteConcern.Safe)
   }
 
 }
@@ -75,7 +82,9 @@ object Swimmer extends ModelCompanion[Swimmer, ObjectId] {
 
 }
 
-case class Name(firstName: String, lastName: String, searchName: String)
+case class Name(firstName: String, lastName: String) {
+  @Persist val searchName = (firstName + " " + lastName).toUpperCase()
+}
 
 case class EventResult(
   id: ObjectId = new ObjectId,

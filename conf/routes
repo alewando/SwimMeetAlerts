@@ -29,3 +29,6 @@ POST   /addUrls        controllers.ManageUrls.add
 GET    /scrape         controllers.ManageUrls.scrape(url) 
 GET    /removeUrl      controllers.ManageUrls.removeUrl(url) 
 GET    /scrapeAll      controllers.ManageUrls.scrapeAll 
+
+# Manage Swimmer
+POST   /addSwimmer     controllers.ManageSwimmers.add

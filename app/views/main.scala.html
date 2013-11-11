@@ -1,4 +1,4 @@
-@(user:Option[User] = None)(content: Html)	
+@(user:Option[User])(content: Html)	
 
 <!DOCTYPE html>
 <html lang="en">
@@ -22,44 +22,29 @@
       <script src="@routes.Assets.at("javascripts/html5shiv.js")"></script>
     <![endif]-->
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>        
+    <script src="@routes.Assets.at("javascripts/bootstrap.js")"></script>
+
   </head>
 
   <body>
-
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
           <a class="brand" href="#">Swim Meet Alerts</a>
-          <a href="manageUrls">Manage URLs</a>
-          <!-- 
             <ul class="nav">
-              <li class="active"><a href="#">Home</a></li>
-              <li><a href="#about">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Action</a></li>
-                  <li><a href="#">Another action</a></li>
-                  <li><a href="#">Something else here</a></li>
-                  <li class="divider"></li>
-                  <li class="nav-header">Nav header</li>
-                  <li><a href="#">Separated link</a></li>
-                  <li><a href="#">One more separated link</a></li>
-                </ul>
-              </li>
+              <li><a href="manageUrls">Meets</a></li>
             </ul>
- -->
 			<span class="navbar-form pull-right">
 			@user match {
-				case Some(user) => {
-				     <a href="@routes.Auth.logout">Sign Out</a>
+				case Some(guy) => {
+				     <a class="btn btn-primary" href="@routes.Auth.logout">Sign Out</a>
 				} 
 				case None => {            
                    @helper.form(routes.Auth.authenticate, 'class -> "") {          
                       <input class="span2" type="text" name="email" placeholder="Email" value="">
                       <input class="span2" type="password" name="password" placeholder="Password">
-                      <button type="submit" class="btn">Sign in</button>
-                      <a href="@routes.Signup.form">Sign Up</a>
+                      <button type="submit" class="btn btn-primary">Sign in</button>
+                      <a class="btn btn-info" href="@routes.Signup.form">Sign Up</a>
                     }
                 }
             }
@@ -75,7 +60,5 @@
       </div>
     </div> <!-- /container -->
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>        
-    <script src="@routes.Assets.at("javascripts/bootstrap.js")"></script>
   </body>
 </html>
