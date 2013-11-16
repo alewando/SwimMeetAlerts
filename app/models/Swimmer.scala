@@ -39,6 +39,11 @@ case class Swimmer(
     User.update(MongoDBObject("_id" -> user.id), MongoDBObject("$addToSet" -> MongoDBObject("watching" -> this.id)), false, false, WriteConcern.Safe)
   }
 
+  def removeWatcher(user: User) {
+    Swimmer.update(MongoDBObject("_id" -> this.id), MongoDBObject("$pull" -> MongoDBObject("watchers" -> user.id)), false, false, WriteConcern.Safe)
+    User.update(MongoDBObject("_id" -> user.id), MongoDBObject("$pull" -> MongoDBObject("watching" -> this.id)), false, false, WriteConcern.Safe)
+  }
+
 }
 
 object Swimmer extends ModelCompanion[Swimmer, ObjectId] {

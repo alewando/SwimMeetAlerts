@@ -1,23 +1,21 @@
 package controllers
 
 import com.typesafe.scalalogging.slf4j.Logging
-import actors.ScrapeAllMeets
-import actors.ScrapeMeet
 import akka.actor.actorRef2Scala
-import models.Meet
+import auth.AuthenticationConfig
+import auth.NormalUser
+import jp.t2v.lab.play2.auth.AuthElement
+import models._
 import play.api.Play.current
 import play.api.data.Form
-import play.api.data.Forms.tuple
 import play.api.data.Forms.text
-import play.api.libs.concurrent.Akka
+import play.api.data.Forms.tuple
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import play.api.mvc.Action
 import play.api.mvc.Controller
 import views.html
-import jp.t2v.lab.play2.auth.AuthElement
-import auth.AuthenticationConfig
-import auth.Administrator
-import auth.NormalUser
-import models._
+import org.bson.types.ObjectId
 
 object ManageSwimmers extends Controller with AuthElement with AuthenticationConfig with Logging {
 
@@ -42,5 +40,15 @@ object ManageSwimmers extends Controller with AuthElement with AuthenticationCon
     Ok(html.index())
   }
 
+  implicit val unfollowRds = (__ \ 'swimmerId).read[String]
+  def unfollow = StackAction(parse.json, AuthorityKey -> NormalUser) { implicit request =>
+    request.body.validate[String].map {
+      case (swimmerId) =>
+        logger.info("Unfollowing {}", swimmerId)
+        Swimmer.findById(new ObjectId(swimmerId)) map { _.removeWatcher(loggedIn) }
+        Ok(Json.obj("result" -> "success"))
+    }.recoverTotal {
+      e => BadRequest("Detected error:" + JsError.toFlatJson(e))
+    }
+  }
 }
-

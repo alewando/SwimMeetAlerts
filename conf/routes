@@ -32,3 +32,4 @@ GET    /scrapeAll      controllers.ManageUrls.scrapeAll
 
 # Manage Swimmer
 POST   /addSwimmer     controllers.ManageSwimmers.add
+POST   /unfollow       controllers.ManageSwimmers.unfollow

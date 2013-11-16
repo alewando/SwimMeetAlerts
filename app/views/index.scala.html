@@ -1,7 +1,10 @@
 @()(implicit user: User)
 
 @swimmer(swimmer: Swimmer) = {
-<h3>@swimmer.fullName</h3>
+<h3>
+	@swimmer.fullName <button class="unfollow btn btn-info btn-xs" title="Unfollow" data-id="@swimmer.id">
+	<i class="icon-minus-sign icon-white"></i></button>
+</h3>
 <table class="table table-bordered table-condensed">
 <thead><tr><th>Event</th><th>Meet</th><th>Time</th><th>Delta</th></tr></thead>
 <tbody>
@@ -27,13 +30,13 @@
 			<div class="control-group">
 				<label class="control-label" for="firstName">First Name</label>
 				<div class="controls">
-					<input type="text" name="firstName" placeholder="">
+					<input type="text" id="firstName" name="firstName" placeholder="">
 				</div>
 			</div>
 			<div class="control-group">
 				<label class="control-label" for="lastName">Last Name</label>
 				<div class="controls">
-					<input type="text" name="lastName" placeholder="">
+					<input type="text" id="lastName" name="lastName" placeholder="">
 				</div>
 			</div>
 			<div class="control-group">
@@ -50,7 +53,23 @@
     
     
 <script>
-$('#addButton').click(function() { $('#addSwimmer').toggle(300);});
+$('#addButton').click(function() { 
+	$('#addSwimmer').toggle(300);
+	$('#firstName').focus();
+});
+
+$('.unfollow').click(function() {
+	$.ajax({
+		url: "@routes.ManageSwimmers.unfollow",
+		type: "POST",
+		data: JSON.stringify({ swimmerId : $(this).attr('data-id')}),
+		dataType: "json",
+		contentType: "application/json",
+		success: function(resp) {
+			alert('yay');
+		}	 
+	});
+});
 </script>
 }
 	
