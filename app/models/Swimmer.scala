@@ -44,6 +44,11 @@ case class Swimmer(
     User.update(MongoDBObject("_id" -> user.id), MongoDBObject("$pull" -> MongoDBObject("watching" -> this.id)), false, false, WriteConcern.Safe)
   }
 
+  def eventsByMeet(): Map[String, List[EventResult]] = {
+    val meets = results map { _.meet } toSet
+    val x = for (meet <- meets) yield (meet, results.filter(result => result.meet == meet))
+    x.toMap
+  }
 }
 
 object Swimmer extends ModelCompanion[Swimmer, ObjectId] {
