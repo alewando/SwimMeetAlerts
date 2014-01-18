@@ -13,6 +13,8 @@ import mongoContext._
 import play.Logger
 import actors.ScrapedResult
 import com.typesafe.scalalogging.slf4j.Logging
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 case class Swimmer(
   id: ObjectId = new ObjectId,
@@ -52,6 +54,25 @@ case class Swimmer(
 }
 
 object Swimmer extends ModelCompanion[Swimmer, ObjectId] {
+  implicit val readObjectIdFormat = new Format[ObjectId] {
+    def reads(jv: JsValue): JsResult[ObjectId] = {
+      JsSuccess(new ObjectId(jv.as[String]))
+    }
+
+    def writes(o: ObjectId): JsValue = JsString(o.toString)
+  }
+
+  implicit val eventResultWrites = (
+    (__ \ "id").write[ObjectId] and
+    (__ \ "meet").write[String] and
+    (__ \ "event").write[String] and
+    (__ \ "age").write[Int] and
+    (__ \ "team").write[String] and
+    (__ \ "place").write[String] and
+    (__ \ "seedTime").write[String] and
+    (__ \ "finalTime").write[String] and
+    (__ \ "delta").write[Option[String]])(unlift(EventResult.unapply))
+
   val dao = new SalatDAO[Swimmer, ObjectId](collection = mongoCollection("swimmers")) {}
 
   val NamePattern = """(\w+) (\w){1} (\w+)""".r

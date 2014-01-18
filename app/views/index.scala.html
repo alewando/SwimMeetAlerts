@@ -19,8 +19,10 @@
     </div>
     <div id="collapse@swimmer.id-@idx" class="panel-collapse collapse in">
       <div class="panel-body">
+      <div class="row">
+      <div class="span6 offset1">
       <table class="table table-bordered table-condensed">
-      <thead><tr><th>Event</th><th>Meet</th><th>Time</th><th>Delta</th></tr></thead>
+      <thead><tr><th>Event</th><th>Time</th><th>Delta</th></tr></thead>
       <tbody>
       @eventsByMeet(meet).map { result =>
         @result.delta.map { d => @defining(d match { 
@@ -29,11 +31,12 @@
           case other => ""
           }) { rowClass => <tr class="@rowClass"> }
         }      	
-      <td>@result.event</td><td>@result.meet</td><td>@result.finalTime</td><td>@result.delta</td></tr>  
+      <td>@result.event</td><td>@result.finalTime</td><td>@result.delta</td></tr>  
       }
       </tbody>
       </table>
-      
+      </div>
+      </div>
       </div>
 	</div>
   </div>
@@ -73,24 +76,11 @@
     
     @activeMeets()
     
-    
-<script>
-$('#addButton').click(function() { 
-	$('#addSwimmer').toggle(300);
-	$('#firstName').focus();
-});
 
-$('.unfollow').click(function() {
-	$.ajax({
-		url: "@routes.ManageSwimmers.unfollow",
-		type: "POST",
-		data: JSON.stringify({ swimmerId : $(this).attr('data-id')}),
-		dataType: "json",
-		contentType: "application/json",
-		success: function(resp) {
-			alert('yay');
-		}	 
-	});
+<script language="javascript" src="@routes.Assets.at("js/index.js")"></script>    
+<script>
+$(document).ready(function() {
+	initPage();
 });
 </script>
 }

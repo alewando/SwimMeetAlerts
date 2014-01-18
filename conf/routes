@@ -2,6 +2,8 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+# JS Router
+GET    /jsrouter       controllers.Application.javascriptRoutes
 # Home page
 GET    /               controllers.Application.index
 
@@ -31,5 +33,6 @@ GET    /removeUrl      controllers.ManageUrls.removeUrl(url)
 GET    /scrapeAll      controllers.ManageUrls.scrapeAll 
 
 # Manage Swimmer
+GET    /getSwimmers    controllers.Application.getFollowedSwimmers
 POST   /addSwimmer     controllers.ManageSwimmers.add
 POST   /unfollow       controllers.ManageSwimmers.unfollow
