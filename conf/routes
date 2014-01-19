@@ -24,6 +24,7 @@ POST   /signup         controllers.Signup.submit
 
 # Meet list
 GET    /meetList       controllers.Application.meetlist
+GET    /activeMeets    controllers.Application.activeMeets
 
 # Manage URLS
 GET    /manageUrls     controllers.ManageUrls.form

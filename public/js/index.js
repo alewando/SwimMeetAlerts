@@ -10,9 +10,16 @@ function initPage() {
 	
 	// Load followed swimmers
 	getSwimmers();
+	updateActiveMeets();
 }
 
-
+function updateActiveMeets() {
+	jsRoutes.controllers.Application.activeMeets().ajax({
+		success: function(data) { 
+			$('#activeMeets').html(activeMeetsTemplate({meets: data}))
+		}
+	});
+}
 function getSwimmers() {
 	jsRoutes.controllers.Application.getFollowedSwimmers().ajax({
 		success: updateSwimmersData

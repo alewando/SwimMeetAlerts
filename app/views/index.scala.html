@@ -1,5 +1,37 @@
 @()(implicit user: User)
 
+@main(Some(user)){
+    <h1>Welcome @user.fullName</h1>
+    <br/>
+    <h2>Your Swimmers <a href="#" id="addButton" class="btn btn-primary" title="Add a swimmer"><i class="icon-plus-sign icon-white"></i>Add</a></h2>
+    <div id="addSwimmer" style="display:none">
+		<form class="form-horizontal" action="@routes.ManageSwimmers.add" method="POST">
+			<div class="control-group">
+				<label class="control-label" for="firstName">First Name</label>
+				<div class="controls">
+					<input type="text" id="firstName" name="firstName" placeholder="">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="lastName">Last Name</label>
+				<div class="controls">
+					<input type="text" id="lastName" name="lastName" placeholder="">
+				</div>
+			</div>
+			<div class="control-group">
+				<div class="controls">
+					<input type="submit" class="btn" value="Follow" />
+				</div>
+			</div>
+		</form>
+    </div>
+    
+    <div id="watchedSwimmers"></div>
+    
+    <h2>Active meets</h2>
+    <ul id="activeMeets">
+    </ul>
+
 <script id="swimmer-template" type="text/x-handlebars-template">
 <h3>
 	{{name}} <button class="unfollow btn btn-info btn-xs pull-right" title="Unfollow" data-id="{{id}}">
@@ -36,46 +68,24 @@
 {{/each}}
 </div>
 </script>
-
-@main(Some(user)){
-    <h1>Welcome @user.fullName</h1>
-    <br/>
-    <h2>Your Swimmers <a href="#" id="addButton" class="btn btn-primary" title="Add a swimmer"><i class="icon-plus-sign icon-white"></i>Add</a></h2>
-    <div id="addSwimmer" style="display:none">
-		<form class="form-horizontal" action="@routes.ManageSwimmers.add" method="POST">
-			<div class="control-group">
-				<label class="control-label" for="firstName">First Name</label>
-				<div class="controls">
-					<input type="text" id="firstName" name="firstName" placeholder="">
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label" for="lastName">Last Name</label>
-				<div class="controls">
-					<input type="text" id="lastName" name="lastName" placeholder="">
-				</div>
-			</div>
-			<div class="control-group">
-				<div class="controls">
-					<input type="submit" class="btn" value="Follow" />
-				</div>
-			</div>
-		</form>
-    </div>
     
-    <div id="watchedSwimmers"></div>
-    
-    @activeMeets()
-    
-
+<script id="activeMeets-template" type="text/x-handlebars-template">
+	{{#each meets}}
+	<li><a href="{{url}}">{{name}}</a></li>
+	{{else}}
+	None
+	{{/each}}
+</script>
 <script language="javascript" src="@routes.Assets.at("js/index.js")"></script>    
 <script>
-var swimmerTemplate;
-$(document).ready(function() {
-	var templ = $("#swimmer-template").html();
-	swimmerTemplate = Handlebars.compile(templ);
-	initPage();
-});
+	var swimmerTemplate, activeMeetsTemplate;
+	$(document).ready(function() {
+		var templ = $("#swimmer-template").html();
+		swimmerTemplate = Handlebars.compile(templ);
+		templ = $("#activeMeets-template").html();
+		activeMeetsTemplate = Handlebars.compile(templ);
+		initPage();
+	});
 </script>
 }
 	

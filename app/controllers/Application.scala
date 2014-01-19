@@ -11,13 +11,17 @@ import models.Swimmer._
 import play.api.libs.json._
 import models.EventResult
 import com.mongodb.casbah.Imports._
+import models.Meet
 
 object Application extends Controller with AuthElement with AuthenticationConfig {
 
   def javascriptRoutes = Action { implicit request =>
     import routes.javascript._
     Ok(
-      Routes.javascriptRouter("jsRoutes")(routes.javascript.Application.getFollowedSwimmers, routes.javascript.ManageSwimmers.unfollow)).as("text/javascript")
+      Routes.javascriptRouter("jsRoutes")(
+        routes.javascript.Application.getFollowedSwimmers,
+        routes.javascript.Application.activeMeets,
+        routes.javascript.ManageSwimmers.unfollow)).as("text/javascript")
   }
 
   def index = StackAction(AuthorityKey -> NormalUser) { implicit request => Ok(html.index()) };
@@ -39,6 +43,11 @@ object Application extends Controller with AuthElement with AuthenticationConfig
     }
 
     Ok(Json.toJson(js))
+  }
+
+  def activeMeets = Action { implicit request =>
+    val activeMeets = Meet.inProgress map { x => Json.obj("name" -> x.name, "url" -> x.eventIndexUrl) }
+    Ok(Json.toJson(activeMeets))
   }
 
 }
