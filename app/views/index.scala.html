@@ -1,38 +1,31 @@
 @()(implicit user: User)
 
-@swimmer(swimmer: Swimmer) = {
+<script id="swimmer-template" type="text/x-handlebars-template">
 <h3>
-	@swimmer.fullName <button class="unfollow btn btn-info btn-xs" title="Unfollow" data-id="@swimmer.id">
+	{{name}} <button class="unfollow btn btn-info btn-xs pull-right" title="Unfollow" data-id="{{id}}">
 	<i class="icon-minus-sign icon-white"></i></button>
 </h3>
 
-<div class="panel-group" id="accordion@swimmer.id">
-@defining(swimmer.eventsByMeet()) { eventsByMeet =>
-@for( (meet, idx) <- eventsByMeet.keys.zipWithIndex) {	
+<div class="panel-group" id="accordion{{id}}">
+{{#each results}}	
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion@swimmer.id" href="#collapse@swimmer.id-@idx">
-        @meet
+        <a data-toggle="collapse" data-parent="#accordion{{../id}}" href="#collapse{{../id}}-{{@@index}}">
+        {{this.meet}}
         </a>
       </h4>
     </div>
-    <div id="collapse@swimmer.id-@idx" class="panel-collapse collapse in">
+    <div id="collapse{{../id}}-{{@@index}}" class="panel-collapse collapse in">
       <div class="panel-body">
       <div class="row">
       <div class="span6 offset1">
       <table class="table table-bordered table-condensed">
       <thead><tr><th>Event</th><th>Time</th><th>Delta</th></tr></thead>
       <tbody>
-      @eventsByMeet(meet).map { result =>
-        @result.delta.map { d => @defining(d match { 
-          case x if x.startsWith("+") => "error"
-          case x if x.startsWith("-") => "success"
-          case other => ""
-          }) { rowClass => <tr class="@rowClass"> }
-        }      	
-      <td>@result.event</td><td>@result.finalTime</td><td>@result.delta</td></tr>  
-      }
+      {{#each this.events}}
+      	<tr class=""><td>{{event}}</td><td>{{finalTime}}</td><td>{{delta}}</td></tr>  
+      {{/each}}
       </tbody>
       </table>
       </div>
@@ -40,11 +33,9 @@
       </div>
 	</div>
   </div>
-}
-}
+{{/each}}
 </div>
-
-}
+</script>
 
 @main(Some(user)){
     <h1>Welcome @user.fullName</h1>
@@ -72,14 +63,18 @@
 		</form>
     </div>
     
-    @user.watching.map { id => @Swimmer.findById(id).map { s => @swimmer(s) }}
+    @{ /* user.watching.map { id => @Swimmer.findById(id).map { s => @swimmer(s) }} */ }
+    <div id="watchedSwimmers"></div>
     
     @activeMeets()
     
 
 <script language="javascript" src="@routes.Assets.at("js/index.js")"></script>    
 <script>
+var swimmerTemplate;
 $(document).ready(function() {
+	var templ = $("#swimmer-template").html();
+	swimmerTemplate = Handlebars.compile(templ);
 	initPage();
 });
 </script>

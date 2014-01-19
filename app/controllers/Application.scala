@@ -25,7 +25,6 @@ object Application extends Controller with AuthElement with AuthenticationConfig
   def meetlist = Action { implicit request => Ok(html.meetList()) }
 
   def getFollowedSwimmers = StackAction(AuthorityKey -> NormalUser) { implicit request =>
-    logger.info("GETTING SWIMMERS!")
 
     val watched = loggedIn.watching.map { id =>
       Swimmer.findById(id) // map { s => s.name.firstName + " " + s.name.lastName }
@@ -33,9 +32,13 @@ object Application extends Controller with AuthElement with AuthenticationConfig
 
     val js: List[JsObject] = watched map { s =>
       val name = s.name.firstName + " " + s.name.lastName
-      Json.obj("name" -> name, "results" -> Json.arr(s.results))
+      val eventsByMeet = for ((meet, events) <- s.eventsByMeet) yield {
+        Json.obj("meet" -> meet, "events" -> events)
+      }
+      Json.obj("name" -> name, "id" -> s.id, "results" -> eventsByMeet)
     }
-    Ok(Json.arr(js))
+
+    Ok(Json.toJson(js))
   }
 
 }

@@ -15,12 +15,21 @@ function initPage() {
 
 function getSwimmers() {
 	jsRoutes.controllers.Application.getFollowedSwimmers().ajax({
-		success: updateSwimmerData
+		success: updateSwimmersData
 	});
 }
 
-function updateSwimmerData() {
-	
+function updateSwimmersData(swimmersData) {
+	$('#watchedSwimmers').empty();
+	$.each(swimmersData, function(idx, swimmerData) {
+		updateSwimmerData(swimmerData);
+	});
+}
+
+function updateSwimmerData(swimmerData) {
+	var html = swimmerTemplate(swimmerData);
+	// TODO: find/replace existing swimmer div if exists instead of clearing all
+	$('#watchedSwimmers').append(html);
 }
 
 function unfollowSwimmer() {

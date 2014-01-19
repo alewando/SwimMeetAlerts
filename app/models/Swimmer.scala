@@ -72,6 +72,7 @@ object Swimmer extends ModelCompanion[Swimmer, ObjectId] {
     (__ \ "seedTime").write[String] and
     (__ \ "finalTime").write[String] and
     (__ \ "delta").write[Option[String]])(unlift(EventResult.unapply))
+  //TODO: How to get a 'derived' field in the JSON: display class (error|success) depending on +/- as first char of delta
 
   val dao = new SalatDAO[Swimmer, ObjectId](collection = mongoCollection("swimmers")) {}
 
