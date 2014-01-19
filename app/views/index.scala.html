@@ -24,7 +24,7 @@
       <thead><tr><th>Event</th><th>Time</th><th>Delta</th></tr></thead>
       <tbody>
       {{#each this.events}}
-      	<tr class=""><td>{{event}}</td><td>{{finalTime}}</td><td>{{delta}}</td></tr>  
+      	<tr class="{{class}}"><td>{{event}}</td><td>{{finalTime}}</td><td>{{delta}}</td></tr>  
       {{/each}}
       </tbody>
       </table>
@@ -63,7 +63,6 @@
 		</form>
     </div>
     
-    @{ /* user.watching.map { id => @Swimmer.findById(id).map { s => @swimmer(s) }} */ }
     <div id="watchedSwimmers"></div>
     
     @activeMeets()

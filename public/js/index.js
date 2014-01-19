@@ -27,7 +27,18 @@ function updateSwimmersData(swimmersData) {
 }
 
 function updateSwimmerData(swimmerData) {
+	// Determine if time was added or lost, provide appropriate css class to template context
+	$.each(swimmerData.results, function(meetIdx, meet) {
+		$.each(meet.events, function(evtIdx, event) {
+			if(event.delta) {
+			var x = event.delta.charAt(0);
+			if(x == "+") { event.class = "error"} else if(x == "-") { event.class="success"}
+			}
+		});
+	});
+	
 	var html = swimmerTemplate(swimmerData);
+	
 	// TODO: find/replace existing swimmer div if exists instead of clearing all
 	$('#watchedSwimmers').append(html);
 }
