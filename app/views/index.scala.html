@@ -3,7 +3,7 @@
 @main(Some(user)){
     <h1>Welcome @user.fullName</h1>
     <br/>
-    <h2>Your Swimmers <a href="#" id="addButton" class="btn btn-primary" title="Add a swimmer"><i class="icon-plus-sign icon-white"></i>Add</a></h2>
+    <h2>Your Swimmers <a href="#" id="addButton" class="btn btn-primary" title="Add a swimmer"><i class="fa fa-plus-square"></i> Add</a></h2>
     <div id="addSwimmer" style="display:none">
 		<form class="form-horizontal" action="@routes.ManageSwimmers.add" method="POST">
 			<div class="control-group">
@@ -35,7 +35,7 @@
 <script id="swimmer-template" type="text/x-handlebars-template">
 <h3>
 	{{name}} <button class="unfollow btn btn-info btn-xs pull-right" title="Unfollow" data-id="{{id}}">
-	<i class="icon-minus-sign icon-white"></i></button>
+	<i class="fa fa-minus-square"></i></button>
 </h3>
 
 <div class="panel-group" id="accordion{{id}}">
@@ -51,7 +51,7 @@
     <div id="collapse{{../id}}-{{@@index}}" class="panel-collapse collapse in">
       <div class="panel-body">
       <div class="row">
-      <div class="span6 offset1">
+      <div class="col-md-6 offset1">
       <table class="table table-bordered table-condensed">
       <thead><tr><th>Event</th><th>Time</th><th>Delta</th></tr></thead>
       <tbody>
