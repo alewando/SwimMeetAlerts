@@ -19,7 +19,7 @@ import auth.Administrator
 
 case class NewMeetUrl(url: String)
 
-object ManageUrls extends Controller with AuthElement with AuthenticationConfig with Logging {
+object ManageUrls extends Controller with AuthElement with AuthenticationConfig with ProvidesHeader with Logging {
 
   val addUrlForm: Form[NewMeetUrl] = Form(
     mapping("url" -> text)(NewMeetUrl.apply)(NewMeetUrl.unapply))

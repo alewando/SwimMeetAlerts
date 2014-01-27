@@ -16,6 +16,8 @@ object Signup extends Controller with Logging {
     mapping("first" -> text, "last" -> text, "email" -> email, "password" -> text)(SignupInfo.apply)(SignupInfo.unapply)
   }
 
+  implicit def header: HeaderData = HeaderData(Nil)
+
   def form = Action { implicit request =>
     Ok(html.signup(signupForm))
   }

@@ -13,7 +13,7 @@ import models.EventResult
 import com.mongodb.casbah.Imports._
 import models.Meet
 
-object Application extends Controller with AuthElement with AuthenticationConfig {
+object Application extends Controller with AuthElement with AuthenticationConfig with ProvidesHeader {
 
   def javascriptRoutes = Action { implicit request =>
     import routes.javascript._
@@ -24,9 +24,14 @@ object Application extends Controller with AuthElement with AuthenticationConfig
         routes.javascript.ManageSwimmers.unfollow)).as("text/javascript")
   }
 
-  def index = StackAction(AuthorityKey -> NormalUser) { implicit request => Ok(html.index()) };
+  def index = StackAction(AuthorityKey -> NormalUser) { implicit request =>
+    Ok(html.index())
+  };
 
-  def meetlist = Action { implicit request => Ok(html.meetList()) }
+  def meetlist = Action { implicit request =>
+    implicit def header = HeaderData(Nil)
+    Ok(html.meetList())
+  }
 
   def getFollowedSwimmers = StackAction(AuthorityKey -> NormalUser) { implicit request =>
 

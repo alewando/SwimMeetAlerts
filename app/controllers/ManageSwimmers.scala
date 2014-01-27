@@ -17,7 +17,7 @@ import play.api.mvc.Controller
 import views.html
 import org.bson.types.ObjectId
 
-object ManageSwimmers extends Controller with AuthElement with AuthenticationConfig with Logging {
+object ManageSwimmers extends Controller with AuthElement with AuthenticationConfig with ProvidesHeader with Logging {
 
   val addSwimmerForm = Form(tuple("firstName" -> text, "lastName" -> text))
 

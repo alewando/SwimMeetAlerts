@@ -8,8 +8,10 @@ import views._
 import models._
 import jp.t2v.lab.play2.auth.LoginLogout
 import com.typesafe.scalalogging.slf4j.Logging
+import auth.AuthenticationConfig
+import jp.t2v.lab.play2.auth.AuthElement
 
-object Auth extends Controller with Logging with LoginLogout with auth.AuthenticationConfig {
+object Auth extends Controller with Logging with LoginLogout with AuthenticationConfig {
 
   val loginForm = Form {
     mapping(
@@ -21,6 +23,8 @@ object Auth extends Controller with Logging with LoginLogout with auth.Authentic
   //  def login = Action { implicit request =>
   //    Ok(html.login(loginForm))
   //  }
+
+  implicit def header: HeaderData = HeaderData(Nil)
 
   def authenticate = Action { implicit request =>
     loginForm.bindFromRequest.fold(

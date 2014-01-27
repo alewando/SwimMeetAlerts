@@ -1,4 +1,4 @@
-@()(implicit user: User)
+@()(implicit user: User, header: HeaderData)
 
 @main(Some(user)){
     <h1>Welcome @user.fullName</h1>
